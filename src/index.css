@@ -266,6 +266,7 @@ img, svg { display: block; }
   will-change: transform, left, top;
 }
 
+
 /* Text content */
 .hero__content {
   position: relative;

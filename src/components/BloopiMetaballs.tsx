@@ -13,12 +13,11 @@ const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 
 /* ── Types ───────────────────────────────────────────────────────── */
 interface Vec2 { x: number; y: number }
-
 type Phase = 'drifting' | 'approaching' | 'merged' | 'separating'
 
 interface BubbleState {
-  pos: Vec2
-  srcPos: Vec2
+  pos:       Vec2
+  srcPos:    Vec2
   targetPos: Vec2
 }
 
@@ -35,51 +34,44 @@ const GLOW_COLORS = [
   [255, 221, 189],
 ] as const
 
-/* ── BLOOPI formation positions (normalized 0-1) ─────────────────── */
-// Isosceles triangle matching the BLOOPI isotipe proportions
-// Three lobes: top, bottom-left, bottom-right
-// Centered at (0.50, 0.52) to sit nicely in the hero
-const BLOOPI_POS: Vec2[] = [
-  { x: 0.500, y: 0.368 }, // top
-  { x: 0.382, y: 0.610 }, // bottom-left
-  { x: 0.618, y: 0.610 }, // bottom-right
+/* ── Drift anchors (normalized) — far apart so separation is clear ─ */
+const DRIFT_ANCHORS: Vec2[] = [
+  { x: 0.500, y: 0.160 }, // top-center
+  { x: 0.155, y: 0.800 }, // far bottom-left
+  { x: 0.845, y: 0.800 }, // far bottom-right
 ]
 
 /* ── Phase durations (seconds) ───────────────────────────────────── */
 const DUR: Record<Phase, number> = {
-  drifting:    4.0,
+  drifting:    4.5,
   approaching: 2.4,
-  merged:      2.8,
+  merged:      3.5,
   separating:  2.2,
 }
-
 const PHASE_SEQUENCE: Phase[] = ['drifting', 'approaching', 'merged', 'separating']
-
-/* ── Drift anchors — where each bubble floats when separated ─────── */
-const DRIFT_ANCHORS: Vec2[] = [
-  { x: 0.500, y: 0.195 }, // top-center
-  { x: 0.170, y: 0.760 }, // far bottom-left
-  { x: 0.830, y: 0.760 }, // far bottom-right
-]
 
 /* ── Component ───────────────────────────────────────────────────── */
 export function BloopiMetaballs() {
-  const wrapRef     = useRef<HTMLDivElement>(null)
-  const canvasRef   = useRef<HTMLCanvasElement>(null)
-  const bubbleRefs  = [
+  const wrapRef   = useRef<HTMLDivElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const blurRef   = useRef<SVGFEGaussianBlurElement>(null)
+  const bubbleRefs = [
     useRef<HTMLDivElement>(null),
     useRef<HTMLDivElement>(null),
     useRef<HTMLDivElement>(null),
   ]
 
   const animRef = useRef({
-    phase: 'drifting' as Phase,
-    phaseProgress: 0,
-    time: 0,
-    bubbles: DRIFT_ANCHORS.map(a => ({
-      pos:      { ...a },
-      srcPos:   { ...a },
-      targetPos:{ ...a },
+    phase:           'drifting' as Phase,
+    phaseProgress:   0,
+    time:            0,
+    /* Formation positions recomputed on resize */
+    formation:       [{ x: 0.5, y: 0.35 }, { x: 0.43, y: 0.53 }, { x: 0.57, y: 0.53 }] as Vec2[],
+    formationCenter: { x: 0.5, y: 0.47 } as Vec2,
+    bubbles:         DRIFT_ANCHORS.map(a => ({
+      pos:       { ...a },
+      srcPos:    { ...a },
+      targetPos: { ...a },
     })) as BubbleState[],
   })
 
@@ -97,33 +89,60 @@ export function BloopiMetaballs() {
     let lastNow = performance.now()
     let raf = 0
 
-    /* ── Sizing ──────────────────────────────────────────────── */
+    /* ── Bubble radius ───────────────────────────────────── */
     const getR = () => {
       const { width: W, height: H } = wrap.getBoundingClientRect()
-      const isMobile = W < 768
-      // Bubble radius — large enough to merge beautifully at BLOOPI positions
-      return Math.min(W, H) * (isMobile ? 0.115 : 0.096)
+      return Math.min(W, H) * (W < 768 ? 0.150 : 0.130)
     }
 
+    /* ── Recompute equilateral triangle in pixel space ───── */
+    const recomputeFormation = () => {
+      const { width: W, height: H } = wrap.getBoundingClientRect()
+      const r = getR()
+      // Triangle side: 1.42 × r → circles overlap ~29 % → clean 3-lobe merge
+      const d = r * 1.42
+      const h = d * Math.sqrt(3) / 2   // triangle altitude
+
+      const cx = 0.500 * W
+      const cy = 0.490 * H  // formation centroid (slightly above screen-center)
+
+      animRef.current.formation = [
+        { x:  cx         / W, y: (cy - h * 2 / 3) / H }, // top
+        { x: (cx - d/2)  / W, y: (cy + h     / 3) / H }, // bottom-left
+        { x: (cx + d/2)  / W, y: (cy + h     / 3) / H }, // bottom-right
+      ]
+      animRef.current.formationCenter = { x: cx / W, y: cy / H }
+    }
+
+    /* ── Resize handler ──────────────────────────────────── */
     const resize = () => {
       const rect = wrap.getBoundingClientRect()
       canvas.width  = rect.width
       canvas.height = rect.height
+
+      // Scale stdDeviation with bubble radius for crisp merge at any size
+      if (blurRef.current) {
+        const sd = Math.round(getR() * 0.25)
+        blurRef.current.setAttribute('stdDeviation', String(sd))
+      }
+
+      recomputeFormation()
       applyBubbleSizes()
       applyPositions()
     }
 
+    /* ── Size bubble divs ────────────────────────────────── */
     const applyBubbleSizes = () => {
-      const r = getR()
+      const r  = getR()
+      const px = `${r * 2}px`
       bubbleRefs.forEach(ref => {
         if (!ref.current) return
-        const d = `${r * 2}px`
-        ref.current.style.width  = d
-        ref.current.style.height = d
+        ref.current.style.width  = px
+        ref.current.style.height = px
       })
     }
 
-    /* ── Position DOM bubbles ────────────────────────────────── */
+    /* ── Position DOM bubbles ────────────────────────────── */
     const applyPositions = () => {
       const W = canvas.width, H = canvas.height
       const r = getR()
@@ -135,20 +154,19 @@ export function BloopiMetaballs() {
       })
     }
 
-    /* ── Draw canvas glows ───────────────────────────────────── */
+    /* ── Canvas: ambient glows + outer halo ──────────────── */
     const drawGlows = () => {
       const { bubbles, phase, phaseProgress } = animRef.current
       const W = canvas.width, H = canvas.height
       const r = getR()
       ctx.clearRect(0, 0, W, H)
 
-      // Per-bubble ambient glow (behind goo layer)
       bubbles.forEach(({ pos }, i) => {
         const px = pos.x * W, py = pos.y * H
         const [cr, cg, cb] = GLOW_COLORS[i]
-        const gr = r * 4.5
-        const g = ctx.createRadialGradient(px, py, 0, px, py, gr)
-        g.addColorStop(0,   `rgba(${cr},${cg},${cb},0.16)`)
+        const gr = r * 4.2
+        const g  = ctx.createRadialGradient(px, py, 0, px, py, gr)
+        g.addColorStop(0,   `rgba(${cr},${cg},${cb},0.18)`)
         g.addColorStop(0.4, `rgba(${cr},${cg},${cb},0.08)`)
         g.addColorStop(1,   `rgba(${cr},${cg},${cb},0)`)
         ctx.beginPath()
@@ -157,55 +175,51 @@ export function BloopiMetaballs() {
         ctx.fill()
       })
 
-      // BLOOPI outer ring — fades in during approaching + merged
       const ringProgress =
         phase === 'merged'      ? 1 :
         phase === 'approaching' ? easeInOutCubic(phaseProgress) :
-        phase === 'separating'  ? 1 - easeInOutCubic(Math.min(phaseProgress * 1.3, 1)) :
+        phase === 'separating'  ? 1 - easeInOutCubic(Math.min(phaseProgress * 1.5, 1)) :
         0
 
       if (ringProgress > 0.01) {
-        const cx = 0.500 * W
-        const cy = 0.490 * H
-        const orbR = r * 3.05
+        const { formationCenter: fc } = animRef.current
+        const cx   = fc.x * W
+        const cy   = fc.y * H
+        const orbR = r * 2.6
 
-        // Soft glow halo around the whole formation
-        const haloG = ctx.createRadialGradient(cx, cy, orbR * 0.5, cx, cy, orbR * 2.2)
+        const haloG = ctx.createRadialGradient(cx, cy, orbR * 0.4, cx, cy, orbR * 2.0)
         haloG.addColorStop(0,   `rgba(184,202,227,${ringProgress * 0.22})`)
-        haloG.addColorStop(0.45,`rgba(202,230,255,${ringProgress * 0.12})`)
+        haloG.addColorStop(0.5, `rgba(202,230,255,${ringProgress * 0.10})`)
         haloG.addColorStop(1,   'rgba(202,230,255,0)')
         ctx.beginPath()
-        ctx.arc(cx, cy, orbR * 2.2, 0, Math.PI * 2)
+        ctx.arc(cx, cy, orbR * 2.0, 0, Math.PI * 2)
         ctx.fillStyle = haloG
         ctx.fill()
 
-        // Thin glass ring stroke
         ctx.beginPath()
-        ctx.arc(cx, cy, orbR * 1.08, 0, Math.PI * 2)
-        ctx.strokeStyle = `rgba(184,202,227,${ringProgress * 0.45})`
+        ctx.arc(cx, cy, orbR * 1.10, 0, Math.PI * 2)
+        ctx.strokeStyle = `rgba(184,202,227,${ringProgress * 0.42})`
         ctx.lineWidth   = 1.5
         ctx.stroke()
 
-        // Inner specular arc (top-left, like a glass highlight)
         ctx.beginPath()
-        ctx.arc(cx - orbR * 0.2, cy - orbR * 0.3, orbR * 0.9, -2.4, -0.8)
-        ctx.strokeStyle = `rgba(255,255,255,${ringProgress * 0.30})`
+        ctx.arc(cx - orbR * 0.2, cy - orbR * 0.3, orbR * 0.85, -2.4, -0.8)
+        ctx.strokeStyle = `rgba(255,255,255,${ringProgress * 0.28})`
         ctx.lineWidth   = 2
         ctx.stroke()
       }
     }
 
-    /* ── State machine ───────────────────────────────────────── */
+    /* ── State machine ───────────────────────────────────── */
     const nextPhase = () => {
-      const st = animRef.current
+      const st  = animRef.current
       const idx = PHASE_SEQUENCE.indexOf(st.phase)
-      st.phase = PHASE_SEQUENCE[(idx + 1) % PHASE_SEQUENCE.length]
+      st.phase         = PHASE_SEQUENCE[(idx + 1) % PHASE_SEQUENCE.length]
       st.phaseProgress = 0
       st.bubbles.forEach(b => { b.srcPos = { ...b.pos } })
 
-      // Set new targets based on incoming phase
       if (st.phase === 'approaching') {
-        st.bubbles.forEach((b, i) => { b.targetPos = { ...BLOOPI_POS[i] } })
+        st.bubbles.forEach((b, i) => { b.targetPos = { ...st.formation[i] } })
       }
       if (st.phase === 'separating') {
         st.bubbles.forEach((b, i) => { b.targetPos = { ...DRIFT_ANCHORS[i] } })
@@ -216,21 +230,17 @@ export function BloopiMetaballs() {
       const st    = animRef.current
       const isMob = canvas.width < 768
       st.time += dt
-
-      // Advance phase progress
-      const prevProg = st.phaseProgress
-      st.phaseProgress = Math.min(prevProg + dt / DUR[st.phase], 1)
+      st.phaseProgress = Math.min(st.phaseProgress + dt / DUR[st.phase], 1)
 
       switch (st.phase) {
         case 'drifting': {
-          // Organic sinusoidal drift around anchors
-          const amp = isMob ? 0.032 : 0.048
+          const amp = isMob ? 0.026 : 0.038
           DRIFT_ANCHORS.forEach((anchor, i) => {
             const off = i * 2.09
-            const spd = 0.30 + i * 0.05
+            const spd = 0.28 + i * 0.05
             st.bubbles[i].pos = {
               x: anchor.x + Math.sin(st.time * spd       + off) * amp,
-              y: anchor.y + Math.cos(st.time * (spd+0.1) + off) * amp * 0.8,
+              y: anchor.y + Math.cos(st.time * (spd+0.1) + off) * amp * 0.75,
             }
           })
           if (st.phaseProgress >= 1) nextPhase()
@@ -240,12 +250,11 @@ export function BloopiMetaballs() {
         case 'approaching': {
           const et = easeInOutCubic(st.phaseProgress)
           st.bubbles.forEach((b, i) => {
-            // Add a small organic wobble while approaching
-            const wob = (1 - et) * 0.015
+            const wob = (1 - et) * 0.010
             const off = i * 2.09
             b.pos = {
-              x: lerp(b.srcPos.x, BLOOPI_POS[i].x, et) + Math.sin(st.time * 1.5 + off) * wob,
-              y: lerp(b.srcPos.y, BLOOPI_POS[i].y, et) + Math.cos(st.time * 1.3 + off) * wob,
+              x: lerp(b.srcPos.x, st.formation[i].x, et) + Math.sin(st.time * 1.5 + off) * wob,
+              y: lerp(b.srcPos.y, st.formation[i].y, et) + Math.cos(st.time * 1.3 + off) * wob,
             }
           })
           if (st.phaseProgress >= 1) nextPhase()
@@ -253,9 +262,8 @@ export function BloopiMetaballs() {
         }
 
         case 'merged': {
-          // Gentle organic pulse while in BLOOPI shape
-          const pulse = 0.006
-          BLOOPI_POS.forEach((target, i) => {
+          const pulse = 0.004
+          st.formation.forEach((target, i) => {
             const off = i * 2.09
             st.bubbles[i].pos = {
               x: target.x + Math.sin(st.time * 1.1 + off) * pulse,
@@ -280,28 +288,24 @@ export function BloopiMetaballs() {
       }
     }
 
-    /* ── Scale bubbles during merged/separating ──────────────── */
+    /* ── Bubble transforms + icon overlay ────────────────── */
     const applyBubbleTransforms = () => {
-      const { phase, phaseProgress } = animRef.current
+      const { phase, phaseProgress, time } = animRef.current
+
       bubbleRefs.forEach((ref, i) => {
         if (!ref.current) return
         let scale = 1
-        let opacity = 1
-
         if (phase === 'merged') {
-          // Subtle breathe
-          scale = 1 + Math.sin(animRef.current.time * 2.0 + i) * 0.025
+          scale = 1 + Math.sin(time * 2.0 + i) * 0.018
         } else if (phase === 'separating' && phaseProgress < 0.15) {
-          // Quick elastic pop on separation start
-          scale = 1 + easeOutElastic(phaseProgress / 0.15) * 0.08
+          scale = 1 + easeOutElastic(phaseProgress / 0.15) * 0.07
         }
-
         ref.current.style.transform = `scale(${scale.toFixed(4)})`
-        ref.current.style.opacity   = `${opacity}`
       })
+
     }
 
-    /* ── RAF loop ────────────────────────────────────────────── */
+    /* ── RAF loop ────────────────────────────────────────── */
     const tick = (now: number) => {
       if (!running) return
       const dt = Math.min((now - lastNow) / 1000, 0.05)
@@ -320,7 +324,6 @@ export function BloopiMetaballs() {
     resize()
     const ro = new ResizeObserver(resize)
     ro.observe(wrap)
-
     raf = requestAnimationFrame(tick)
 
     return () => {
@@ -334,30 +337,27 @@ export function BloopiMetaballs() {
   return (
     <div ref={wrapRef} className="bm" aria-hidden="true">
 
-      {/* Canvas — ambient glows & outer ring (z-index below goo) */}
+      {/* Ambient glows + outer ring */}
       <canvas ref={canvasRef} className="bm__canvas" />
 
-      {/* SVG gooey filter definition */}
+      {/* Gooey SVG filter */}
       <svg className="bm__svg-defs">
         <defs>
           <filter id="bm-goo" x="-50%" y="-50%" width="200%" height="200%"
                   colorInterpolationFilters="sRGB">
-            {/* Blur spreads alpha so nearby circles merge */}
-            <feGaussianBlur in="SourceGraphic" stdDeviation="16" result="blur" />
-            {/* High contrast threshold creates sharp merged edges */}
+            <feGaussianBlur ref={blurRef} in="SourceGraphic" stdDeviation="24" result="blur" />
             <feColorMatrix in="blur" mode="matrix"
               values="1 0 0 0 0
                       0 1 0 0 0
                       0 0 1 0 0
                       0 0 0 22 -9"
               result="goo" />
-            {/* Composite original colors over the gooey alpha mask */}
             <feComposite in="SourceGraphic" in2="goo" operator="atop" />
           </filter>
         </defs>
       </svg>
 
-      {/* Gooey container — filter applied here */}
+      {/* Three metaball bubbles */}
       <div className="bm__goo">
         {BUBBLE_GRADIENTS.map((grad, i) => (
           <div
