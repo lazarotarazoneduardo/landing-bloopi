@@ -266,6 +266,21 @@ img, svg { display: block; }
   will-change: transform, left, top;
 }
 
+/* Isotipe overlay — exact 3-lobe + Y-channel shape, fades in during merged */
+.bm__iso {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  will-change: opacity;
+  filter: drop-shadow(0 8px 32px rgba(134, 129, 160, 0.30));
+}
+.bm__iso svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 
 /* Text content */
 .hero__content {
