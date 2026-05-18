@@ -245,9 +245,9 @@ export function SoapBubbleBackground() {
       // browser has committed one paint, guaranteeing the transition fires
       // on iOS Safari and Chrome Android (more reliable than void offsetHeight).
       el.style.cssText = [
-        'position:fixed',
-        `left:${x}px`,
-        `top:${y}px`,
+        'position:absolute',
+        `left:${x + window.scrollX}px`,
+        `top:${y + window.scrollY}px`,
         `transform:translate(-50%,-50%) rotate(${rot}) scale(${reduced ? 1 : 0.5})`,
         `opacity:${reduced ? 1 : 0}`,
         'z-index:202',
