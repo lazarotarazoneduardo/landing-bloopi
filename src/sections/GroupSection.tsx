@@ -6,7 +6,7 @@ export function GroupSection() {
 
           {/* Text */}
           <div>
-            <span className="section__label">La diferencia</span>
+
             <h2 className="section__title" id="group-title">
               No es solo tu perfil.<br />
               <em>Es tu grupo.</em>

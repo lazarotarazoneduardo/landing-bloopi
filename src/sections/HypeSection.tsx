@@ -10,9 +10,7 @@ export function HypeSection() {
     <section className="section hype" aria-labelledby="hype-title">
       <div className="section__inner">
 
-        <span className="section__label">Pre-lanzamiento</span>
-
-        <h2 className="section__title" id="hype-title">
+<h2 className="section__title" id="hype-title">
           No es otra red social más.
         </h2>
 
