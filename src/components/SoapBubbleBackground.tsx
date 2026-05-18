@@ -52,7 +52,7 @@ const MESSAGES = [
   'Conecta en Bloopi',
   'Ratona te quiero!',
   'Papá va x ti',
-  'x ti, no x mí',
+
   'Crece en equipo',
   'The group era begins',
   'Not another feed',
