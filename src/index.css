@@ -44,10 +44,6 @@ body {
   min-height: 100vh;
 }
 
-#root {
-  position: relative; /* anchor for .bubble-tags-layer */
-}
-
 a    { color: inherit; text-decoration: none; }
 button { cursor: pointer; border: none; background: none; font-family: inherit; }
 input  { font-family: inherit; }
@@ -779,14 +775,11 @@ img, svg { display: block; }
   height: 100%;
 }
 
-/* Absolute layer anchored to top:0 of the page so tags scroll with content */
+/* Fixed overlay — same coordinate space as the canvas (viewport).
+   Tags use clientX/clientY directly, no scrollY offset needed. */
 .bubble-tags-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 0;
-  height: 0;
-  overflow: visible;
+  position: fixed;
+  inset: 0;
   pointer-events: none;
   z-index: 201;
 }

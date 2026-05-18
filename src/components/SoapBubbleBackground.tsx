@@ -229,8 +229,8 @@ export function SoapBubbleBackground() {
     }
 
     // Spawn a float-tag pill at (x, y) with the next message from the pool.
-    // Direct DOM injection keeps it outside React's render cycle and avoids
-    // any stale-closure issues with the mutable bubbles array.
+    // #bubble-tags is position:fixed so (x, y) are pure viewport coords —
+    // no scrollY needed, same coordinate space as the canvas.
     const spawnTag = (x: number, y: number) => {
       if (msgPool.current.length === 0) return
       const text = msgPool.current.shift()!
@@ -238,11 +238,10 @@ export function SoapBubbleBackground() {
       const el   = document.createElement('span')
       el.className = 'float-tag float-tag--popped'
       el.textContent = text
-      // Use scrollY so the tag is anchored to the page, not the viewport
       el.style.cssText = [
         'position:absolute',
         `left:${x}px`,
-        `top:${y + window.scrollY}px`,
+        `top:${y}px`,
         `--pop-rot:${rot}deg`,
       ].join(';')
       document.getElementById('bubble-tags')?.appendChild(el)
@@ -263,15 +262,16 @@ export function SoapBubbleBackground() {
       }
     }
 
-    const onClick = (e: MouseEvent) => {
+    const tryPop = (clientX: number, clientY: number, isTouch: boolean) => {
       if (reduced) return
-      const mx = e.clientX
-      const my = e.clientY
+      // Expand hit radius for touch — a finger covers more area than a cursor
+      const extra = isTouch ? 10 : 0
       for (let i = bubbles.length - 1; i >= 0; i--) {
-        const b  = bubbles[i]
-        const dx = mx - b.x
-        const dy = my - b.y
-        if (dx * dx + dy * dy <= b.r * b.r) {
+        const b    = bubbles[i]
+        const hitR = b.r + extra
+        const dx   = clientX - b.x
+        const dy   = clientY - b.y
+        if (dx * dx + dy * dy <= hitR * hitR) {
           const N = 9
           const particles = Array.from({ length: N }, (_, j) => ({
             angle: (j / N) * Math.PI * 2 + (Math.random() - 0.5) * 0.5,
@@ -285,6 +285,13 @@ export function SoapBubbleBackground() {
           break
         }
       }
+    }
+
+    // pointerdown covers mouse, touch and stylus in one event.
+    // passive:true so the browser never waits on us before scrolling.
+    // No preventDefault/stopPropagation — taps on buttons/links still fire.
+    const onPointerDown = (e: PointerEvent) => {
+      tryPop(e.clientX, e.clientY, e.pointerType === 'touch')
     }
 
     const tick = (now: number) => {
@@ -314,7 +321,7 @@ export function SoapBubbleBackground() {
 
     resize()
     window.addEventListener('resize', resize)
-    window.addEventListener('click', onClick)
+    window.addEventListener('pointerdown', onPointerDown, { passive: true })
 
     if (!reduced) rafId = requestAnimationFrame(tick)
 
@@ -322,7 +329,7 @@ export function SoapBubbleBackground() {
       running = false
       cancelAnimationFrame(rafId)
       window.removeEventListener('resize', resize)
-      window.removeEventListener('click', onClick)
+      window.removeEventListener('pointerdown', onPointerDown)
       document.querySelectorAll('.float-tag--popped').forEach(el => el.remove())
     }
   }, [])
