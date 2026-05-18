@@ -62,9 +62,8 @@ export function Hero() {
         />
 
         <h1 className="hero__headline">
-          La próxima red social<br />
-          no empieza en un perfil.<br />
-          <em>Empieza en un grupo.</em>
+          Made in Spain.<br />
+          <em>Made for the world.</em>
         </h1>
 
         <p className="hero__sub">

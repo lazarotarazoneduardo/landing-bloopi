@@ -29,8 +29,6 @@ const COLORS = [
 ] as const
 
 const MESSAGES = [
-  'Made in Spain',
-  'Made for the world',
   'Early Access Soon',
   'Bloopi is coming',
   'World, meet Bloopi',
