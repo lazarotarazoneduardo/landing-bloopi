@@ -228,42 +228,45 @@ export function SoapBubbleBackground() {
       if (counterRef.current) counterRef.current.textContent = String(n)
     }
 
-    // Spawn a float-tag pill at (x, y) with the next message from the pool.
-    // Entrance animation uses CSS transitions triggered via double-rAF after
-    // DOM insertion — far more reliable on iOS Safari than @keyframes with
-    // fill-mode + delay on dynamically inserted elements.
+    // Tags are appended directly to document.body as position:fixed elements —
+    // no intermediate container. Nested fixed containers cause rendering bugs
+    // on iOS Safari. backdrop-filter inside fixed stacking contexts also fails
+    // on Safari, so it is omitted here and a solid background is used instead.
+    //
+    // The void el.offsetHeight trick forces a synchronous layout reflow so the
+    // browser commits the initial state (opacity:0, scale:0.4) before we set
+    // the final state, guaranteeing the CSS transition fires on all browsers.
+    const spawnedTags: HTMLElement[] = []
+
     const spawnTag = (x: number, y: number) => {
       if (msgPool.current.length === 0) return
       const text = msgPool.current.shift()!
-      const rot  = (Math.random() * 8 - 4).toFixed(1)
-
-      const wrapper = document.createElement('div')
-      wrapper.className = 'bubble-tag-wrapper'
-      wrapper.style.cssText = `position:absolute;left:${x}px;top:${y}px;transform:translate(-50%,-50%) rotate(${rot}deg)`
+      const rot  = `${(Math.random() * 8 - 4).toFixed(1)}deg`
 
       const el = document.createElement('span')
-      el.className = 'float-tag float-tag--popped'
+      el.className   = 'float-tag float-tag--popped'
       el.textContent = text
+      el.style.position      = 'fixed'
+      el.style.left          = `${x}px`
+      el.style.top           = `${y}px`
+      el.style.zIndex        = '202'
+      el.style.pointerEvents = 'none'
+
+      document.body.appendChild(el)
+      spawnedTags.push(el)
 
       if (reduced) {
-        // No animation — show immediately
-        wrapper.appendChild(el)
-        document.getElementById('bubble-tags')?.appendChild(wrapper)
+        el.style.transform = `translate(-50%,-50%) rotate(${rot})`
+        el.style.opacity   = '1'
       } else {
-        // Start hidden, insert, then trigger transition on next two frames.
-        // Two rAFs ensure the browser has committed and painted the initial
-        // state before we change it, guaranteeing the transition fires.
-        el.style.opacity = '0'
-        el.style.transform = 'scale(0.4)'
-        el.style.transition = 'opacity 0.32s ease, transform 0.38s cubic-bezier(0.34,1.56,0.64,1)'
-        wrapper.appendChild(el)
-        document.getElementById('bubble-tags')?.appendChild(wrapper)
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            el.style.opacity = '1'
-            el.style.transform = 'scale(1)'
-          })
-        })
+        el.style.transform = `translate(-50%,-50%) rotate(${rot}) scale(0.4)`
+        el.style.opacity   = '0'
+        // Force synchronous layout before setting transition — the most
+        // reliable cross-browser way to ensure the initial state is painted.
+        void el.offsetHeight
+        el.style.transition = 'opacity 0.30s ease, transform 0.36s cubic-bezier(0.34,1.56,0.64,1)'
+        el.style.transform  = `translate(-50%,-50%) rotate(${rot}) scale(1)`
+        el.style.opacity    = '1'
       }
     }
 
@@ -318,7 +321,7 @@ export function SoapBubbleBackground() {
           explosions.push({ x: b.x, y: b.y, r: b.r, ci: b.ci, progress: 0, particles })
           bubbles.splice(i, 1)
           updateCounter(bubbles.length)
-          spawnTag(b.x, b.y)
+          spawnTag(clientX, clientY)  // tag at exact tap/click position
           break
         }
       }
@@ -367,8 +370,7 @@ export function SoapBubbleBackground() {
       cancelAnimationFrame(rafId)
       window.removeEventListener('resize', resize)
       window.removeEventListener('pointerdown', onPointerDown)
-      const tagsContainer = document.getElementById('bubble-tags')
-      if (tagsContainer) tagsContainer.innerHTML = ''
+      spawnedTags.forEach(el => el.remove())
     }
   }, [])
 
@@ -379,8 +381,6 @@ export function SoapBubbleBackground() {
         className="soap-bubbles"
         aria-hidden="true"
       />
-      {/* Anchor layer for page-position tags: absolute within the document flow */}
-      <div id="bubble-tags" className="bubble-tags-layer" aria-hidden="true" />
       <div className="bubble-counter" aria-live="polite" aria-label="Burbujas restantes">
         <span className="bubble-counter__icon">○</span>
         <span ref={counterRef} className="bubble-counter__num">0</span>
