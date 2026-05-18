@@ -16,12 +16,6 @@ export function HypeSection() {
           No es otra red social más.
         </h2>
 
-        <p className="section__body">
-          BLOOPI está tomando forma. Una nueva experiencia social nacida
-          para poner a los grupos en el centro. Todavía no está abierta.
-          Pero cuando lo esté, querrás haber estado desde el principio.
-        </p>
-
         <div className="hype__cards">
           {CARDS.map((card, i) => (
             <div className="hype__card" key={i}>
