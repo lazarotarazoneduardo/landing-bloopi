@@ -882,4 +882,5 @@ img, svg { display: block; }
   }
 
   .float-tag:not(.float-tag--popped) { display: none; }
+  .float-tag--popped { font-size: 9px; padding: 4px 9px; }
 }
