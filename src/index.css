@@ -880,5 +880,5 @@ img, svg { display: block; }
     padding: 36px 20px;
   }
 
-  .float-tag { display: none; }
+  .float-tag:not(.float-tag--popped) { display: none; }
 }
