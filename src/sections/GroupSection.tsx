@@ -11,12 +11,6 @@ export function GroupSection() {
               No es solo tu perfil.<br />
               <em>Es tu grupo.</em>
             </h2>
-            <p className="section__body">
-              La nueva generación social no se construye solo alrededor
-              de individuos. También se construye con grupos, energía
-              colectiva y momentos compartidos. BLOOPI lo sabe.
-              Y está preparada para eso.
-            </p>
           </div>
 
           {/* Orb render from Higgsfield */}

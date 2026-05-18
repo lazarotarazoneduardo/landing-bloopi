@@ -10,12 +10,6 @@ export function GlobalSection() {
           <em>Preparada para salir fuera.</em>
         </h2>
 
-        <p className="section__body">
-          BLOOPI nace en España con ambición global. Una red social
-          pensada para todo el mundo, construida desde el primer día
-          para crecer más allá de las fronteras.
-        </p>
-
         <div className="global-badge">
           🇪🇸 Built in Spain &nbsp;·&nbsp; Made for the world 🌍
         </div>
