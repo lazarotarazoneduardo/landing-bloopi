@@ -229,23 +229,35 @@ export function SoapBubbleBackground() {
     }
 
     // Spawn a float-tag pill at (x, y) with the next message from the pool.
-    // #bubble-tags is position:fixed so (x, y) are pure viewport coords —
-    // no scrollY needed, same coordinate space as the canvas.
+    // Wrapper div holds position + rotation via plain inline style (no CSS
+    // custom properties in the transform) so the inner span's @keyframes
+    // animation only animates opacity + scale — reliable on iOS Safari.
     const spawnTag = (x: number, y: number) => {
       if (msgPool.current.length === 0) return
       const text = msgPool.current.shift()!
       const rot  = (Math.random() * 8 - 4).toFixed(1)
-      const el   = document.createElement('span')
-      el.className = 'float-tag float-tag--popped'
-      el.textContent = text
-      el.style.cssText = [
+
+      const wrapper = document.createElement('div')
+      wrapper.className = 'bubble-tag-wrapper'
+      wrapper.style.cssText = [
         'position:absolute',
         `left:${x}px`,
         `top:${y}px`,
-        `--pop-rot:${rot}deg`,
+        `transform:translate(-50%,-50%) rotate(${rot}deg)`,
       ].join(';')
-      document.getElementById('bubble-tags')?.appendChild(el)
+
+      const el = document.createElement('span')
+      el.className = 'float-tag float-tag--popped'
+      el.textContent = text
+
+      wrapper.appendChild(el)
+      document.getElementById('bubble-tags')?.appendChild(wrapper)
     }
+
+    // Track the last bubble count so we only regenerate when the
+    // mobile/desktop breakpoint actually changes, not on every browser-
+    // chrome resize (address bar hiding/showing on scroll in mobile).
+    let lastCount = -1
 
     const resize = () => {
       W = window.innerWidth
@@ -253,9 +265,21 @@ export function SoapBubbleBackground() {
       canvas.width  = W
       canvas.height = H
       const count = W < 768 ? 8 : 18
-      bubbles    = makeBubbles(W, H, count)
-      explosions = []
-      updateCounter(bubbles.length)
+
+      if (count !== lastCount) {
+        // Real layout change (first load or orientation flip) → regenerate
+        bubbles    = makeBubbles(W, H, count)
+        explosions = []
+        updateCounter(bubbles.length)
+        lastCount  = count
+      } else {
+        // Just browser chrome resizing (mobile scroll) → keep bubbles, clamp positions
+        for (const b of bubbles) {
+          b.x = Math.min(Math.max(b.x, b.r), W - b.r)
+          b.y = Math.min(Math.max(b.y, b.r), H - b.r)
+        }
+      }
+
       if (reduced) {
         ctx.clearRect(0, 0, W, H)
         for (const b of bubbles) drawBubble(ctx, b, 0)
@@ -330,7 +354,8 @@ export function SoapBubbleBackground() {
       cancelAnimationFrame(rafId)
       window.removeEventListener('resize', resize)
       window.removeEventListener('pointerdown', onPointerDown)
-      document.querySelectorAll('.float-tag--popped').forEach(el => el.remove())
+      const tagsContainer = document.getElementById('bubble-tags')
+      if (tagsContainer) tagsContainer.innerHTML = ''
     }
   }, [])
 
