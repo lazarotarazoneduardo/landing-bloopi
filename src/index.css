@@ -780,6 +780,7 @@ img, svg { display: block; }
    No backdrop-filter: it causes rendering failures on iOS Safari inside
    fixed stacking contexts. Solid background used instead. */
 .float-tag--popped {
+  animation: none;
   padding: 6px 13px;
   border-radius: 100px;
   background: rgba(255, 255, 255, 0.92);
