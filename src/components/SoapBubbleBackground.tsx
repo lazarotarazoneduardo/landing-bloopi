@@ -228,14 +228,6 @@ export function SoapBubbleBackground() {
       if (counterRef.current) counterRef.current.textContent = String(n)
     }
 
-    // Tags are appended directly to document.body as position:fixed elements —
-    // no intermediate container. Nested fixed containers cause rendering bugs
-    // on iOS Safari. backdrop-filter inside fixed stacking contexts also fails
-    // on Safari, so it is omitted here and a solid background is used instead.
-    //
-    // The void el.offsetHeight trick forces a synchronous layout reflow so the
-    // browser commits the initial state (opacity:0, scale:0.4) before we set
-    // the final state, guaranteeing the CSS transition fires on all browsers.
     const spawnedTags: HTMLElement[] = []
 
     const spawnTag = (x: number, y: number) => {
@@ -246,27 +238,31 @@ export function SoapBubbleBackground() {
       const el = document.createElement('span')
       el.className   = 'float-tag float-tag--popped'
       el.textContent = text
-      el.style.position      = 'fixed'
-      el.style.left          = `${x}px`
-      el.style.top           = `${y}px`
-      el.style.zIndex        = '202'
-      el.style.pointerEvents = 'none'
+
+      // ALL styles — including centering transform — set in one cssText
+      // BEFORE appendChild so the element never paints without centering.
+      // opacity:0 hides the initial state; setTimeout(16) fires after the
+      // browser has committed one paint, guaranteeing the transition fires
+      // on iOS Safari and Chrome Android (more reliable than void offsetHeight).
+      el.style.cssText = [
+        'position:fixed',
+        `left:${x}px`,
+        `top:${y}px`,
+        `transform:translate(-50%,-50%) rotate(${rot}) scale(${reduced ? 1 : 0.5})`,
+        `opacity:${reduced ? 1 : 0}`,
+        'z-index:202',
+        'pointer-events:none',
+      ].join(';')
 
       document.body.appendChild(el)
       spawnedTags.push(el)
 
-      if (reduced) {
-        el.style.transform = `translate(-50%,-50%) rotate(${rot})`
-        el.style.opacity   = '1'
-      } else {
-        el.style.transform = `translate(-50%,-50%) rotate(${rot}) scale(0.4)`
-        el.style.opacity   = '0'
-        // Force synchronous layout before setting transition — the most
-        // reliable cross-browser way to ensure the initial state is painted.
-        void el.offsetHeight
-        el.style.transition = 'opacity 0.30s ease, transform 0.36s cubic-bezier(0.34,1.56,0.64,1)'
-        el.style.transform  = `translate(-50%,-50%) rotate(${rot}) scale(1)`
-        el.style.opacity    = '1'
+      if (!reduced) {
+        setTimeout(() => {
+          el.style.transition = 'opacity 0.28s ease, transform 0.34s cubic-bezier(0.34,1.56,0.64,1)'
+          el.style.opacity    = '1'
+          el.style.transform  = `translate(-50%,-50%) rotate(${rot}) scale(1)`
+        }, 16)
       }
     }
 
