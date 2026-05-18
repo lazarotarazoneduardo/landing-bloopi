@@ -229,9 +229,9 @@ export function SoapBubbleBackground() {
     }
 
     // Spawn a float-tag pill at (x, y) with the next message from the pool.
-    // Wrapper div holds position + rotation via plain inline style (no CSS
-    // custom properties in the transform) so the inner span's @keyframes
-    // animation only animates opacity + scale — reliable on iOS Safari.
+    // Entrance animation uses CSS transitions triggered via double-rAF after
+    // DOM insertion — far more reliable on iOS Safari than @keyframes with
+    // fill-mode + delay on dynamically inserted elements.
     const spawnTag = (x: number, y: number) => {
       if (msgPool.current.length === 0) return
       const text = msgPool.current.shift()!
@@ -239,19 +239,32 @@ export function SoapBubbleBackground() {
 
       const wrapper = document.createElement('div')
       wrapper.className = 'bubble-tag-wrapper'
-      wrapper.style.cssText = [
-        'position:absolute',
-        `left:${x}px`,
-        `top:${y}px`,
-        `transform:translate(-50%,-50%) rotate(${rot}deg)`,
-      ].join(';')
+      wrapper.style.cssText = `position:absolute;left:${x}px;top:${y}px;transform:translate(-50%,-50%) rotate(${rot}deg)`
 
       const el = document.createElement('span')
       el.className = 'float-tag float-tag--popped'
       el.textContent = text
 
-      wrapper.appendChild(el)
-      document.getElementById('bubble-tags')?.appendChild(wrapper)
+      if (reduced) {
+        // No animation — show immediately
+        wrapper.appendChild(el)
+        document.getElementById('bubble-tags')?.appendChild(wrapper)
+      } else {
+        // Start hidden, insert, then trigger transition on next two frames.
+        // Two rAFs ensure the browser has committed and painted the initial
+        // state before we change it, guaranteeing the transition fires.
+        el.style.opacity = '0'
+        el.style.transform = 'scale(0.4)'
+        el.style.transition = 'opacity 0.32s ease, transform 0.38s cubic-bezier(0.34,1.56,0.64,1)'
+        wrapper.appendChild(el)
+        document.getElementById('bubble-tags')?.appendChild(wrapper)
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            el.style.opacity = '1'
+            el.style.transform = 'scale(1)'
+          })
+        })
+      }
     }
 
     // Track the last bubble count so we only regenerate when the

@@ -792,12 +792,13 @@ img, svg { display: block; }
 }
 
 /* Pill tag spawned on bubble pop — same glass aesthetic as hero float-tags.
-   Animation only touches opacity + scale, zero CSS variables in keyframes. */
+   No CSS animation here: entrance is handled via JS transitions (double-rAF)
+   for reliable cross-browser behaviour on iOS Safari and Android Chrome. */
 .float-tag--popped {
   display: inline-block;
   padding: 6px 13px;
   border-radius: 100px;
-  background: rgba(255, 255, 255, 0.65);
+  background: rgba(255, 255, 255, 0.82);
   border: 1px solid var(--border-glass);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -808,12 +809,6 @@ img, svg { display: block; }
   color: var(--col-slate);
   white-space: nowrap;
   box-shadow: var(--shadow-soft);
-  animation: tag-pop-in 0.40s 0.12s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}
-
-@keyframes tag-pop-in {
-  from { opacity: 0; transform: scale(0.4); }
-  to   { opacity: 1; transform: scale(1);   }
 }
 
 .bubble-counter {
