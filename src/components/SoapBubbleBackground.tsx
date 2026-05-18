@@ -274,7 +274,7 @@ export function SoapBubbleBackground() {
       H = window.innerHeight
       canvas.width  = W
       canvas.height = H
-      const count = W < 768 ? 8 : 18
+      const count = W < 768 ? 16 : 18
 
       if (count !== lastCount) {
         // Real layout change (first load or orientation flip) → regenerate
