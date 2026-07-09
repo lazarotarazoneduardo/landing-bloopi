@@ -1,95 +1,69 @@
 import { useState } from 'react'
+import { useReveal } from '../hooks/useReveal'
+import { WaitlistForm } from '../components/WaitlistForm'
 
-function isValidEmail(email: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-}
+const PILLARS = [
+  { icon: '◉',  title: 'Loops que viven',      body: 'Los mejores momentos de tus chats se convierten en Loops que tu gente revive en el feed.' },
+  { icon: '🫧', title: 'Grupos de verdad',      body: 'Chat con fotos, vídeo, notas circulares, historias y sesiones. Todo en tu círculo.' },
+  { icon: '🗳', title: 'Democracia de verdad',  body: 'En Bloopi el grupo lo vota todo. Hasta quién entra o sale.' },
+]
 
 export function WaitlistSection() {
-  const [email, setEmail]       = useState('')
-  const [submitted, setSubmitted] = useState(false)
-  const [error, setError]       = useState('')
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!isValidEmail(email)) {
-      setError('Introduce un email válido.')
-      return
-    }
-    // Persist in localStorage (no backend yet)
-    try {
-      const existing: string[] = JSON.parse(localStorage.getItem('bloopi_waitlist') ?? '[]')
-      if (!existing.includes(email)) {
-        existing.push(email)
-        localStorage.setItem('bloopi_waitlist', JSON.stringify(existing))
-      }
-    } catch {
-      // ignore storage errors
-    }
-    setSubmitted(true)
-    setError('')
-  }
+  const ref = useReveal()
+  const [showPrivacy, setShowPrivacy] = useState(false)
 
   return (
-    <section
-      id="waitlist"
-      className="section section--alt waitlist"
-      aria-labelledby="waitlist-title"
-    >
-      <div className="section__inner">
-
-        <span className="section__label">Acceso anticipado</span>
-
-        <h2 className="section__title" id="waitlist-title">
-          Los primeros<br />
-          <em>entran antes.</em>
-        </h2>
-
-        <p className="section__body">
-          Estamos preparando los primeros accesos. Si quieres estar dentro
-          desde el principio, deja tu señal.
+    <section id="waitlist" className="sec final" aria-labelledby="waitlist-title">
+      <div ref={ref} className="sec__inner rv">
+        <span className="sec__eyebrow">Hecha en España · pensada para el mundo</span>
+        <h2 id="waitlist-title">Los primeros <em>entran antes.</em></h2>
+        <p className="lead lead--center">
+          La beta ya está en marcha con grupos reales. Deja tu email y te avisamos
+          cuando se abra tu hueco.
         </p>
 
-        {submitted ? (
-          <div className="waitlist__success" role="alert">
-            <div className="waitlist__success-icon" aria-hidden="true">✦</div>
-            <p className="waitlist__success-text">
-              Ya estás en la lista. Te avisaremos antes del lanzamiento.
-            </p>
-          </div>
-        ) : (
-          <>
-            <form
-              className="waitlist__form"
-              onSubmit={handleSubmit}
-              noValidate
-              aria-label="Formulario de acceso anticipado"
-            >
-              <input
-                className="waitlist__input"
-                type="email"
-                placeholder="tu@email.com"
-                value={email}
-                onChange={e => { setEmail(e.target.value); setError('') }}
-                aria-label="Tu email"
-                autoComplete="email"
-                required
-              />
-              <button className="waitlist__submit" type="submit">
-                Quiero acceso anticipado
-              </button>
-            </form>
-            {error && (
-              <p style={{ marginTop: 10, fontSize: 13, color: '#8681A0' }} role="alert">
-                {error}
-              </p>
-            )}
-            <p className="waitlist__micro">
-              Sin spam. Solo el aviso cuando BLOOPI abra sus primeras puertas.
-            </p>
-          </>
-        )}
+        <div className="pillars">
+          {PILLARS.map(p => (
+            <div className="pillar" key={p.title}>
+              <span className="ico" aria-hidden="true">{p.icon}</span>
+              <h3>{p.title}</h3>
+              <p>{p.body}</p>
+            </div>
+          ))}
+        </div>
 
+        <div className="final__form" onClickCapture={e => {
+          const target = e.target as HTMLElement
+          if (target.tagName === 'A' && target.getAttribute('href') === '#privacidad') {
+            e.preventDefault()
+            setShowPrivacy(true)
+          }
+        }}>
+          <WaitlistForm cta="Quiero acceso anticipado" />
+        </div>
+        <p className="hero__micro">Sin spam. Solo el aviso cuando Bloopi abra tus puertas.</p>
       </div>
+
+      {showPrivacy && (
+        <div className="privacy-overlay" role="dialog" aria-modal="true" aria-label="Cómo tratamos tus datos">
+          <div className="privacy-modal">
+            <h3>Cómo tratamos tus datos</h3>
+            <p>
+              Tu email lo guarda el equipo de Bloopi con un único fin: avisarte del
+              acceso anticipado y del lanzamiento. No lo compartimos con nadie, no
+              hay listas de marketing de terceros y no te perfilamos.
+            </p>
+            <p>
+              Puedes pedir que lo borremos en cualquier momento escribiendo a{' '}
+              <a href="mailto:hola@bloopi.app">hola@bloopi.app</a> y desaparecerá de
+              la lista. Sin preguntas.
+            </p>
+            <button className="privacy-close" onClick={() => setShowPrivacy(false)}>
+              Entendido
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   )
 }
