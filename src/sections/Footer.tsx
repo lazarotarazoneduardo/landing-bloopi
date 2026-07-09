@@ -6,7 +6,7 @@ export function Footer() {
         <span className="footer__copy">BLOOPI © 2026</span>
       </div>
       <span className="footer__tagline">
-        Built in Spain &nbsp;·&nbsp; Made for the world
+        Built in Spain · Made for the world
       </span>
       <a
         className="footer__instagram"

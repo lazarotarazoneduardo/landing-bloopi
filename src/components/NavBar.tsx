@@ -10,7 +10,7 @@ export function NavBar() {
         <span className="nav__wordmark">BLOOPI</span>
       </div>
       <button className="nav__cta" onClick={scrollToWaitlist}>
-        Quiero estar dentro
+        Entrar en la beta
       </button>
     </nav>
   )

@@ -19,49 +19,40 @@ interface Explosion {
   particles: Array<{ angle: number; dist: number; size: number }>
 }
 
-// BLOOPI palette: sky, pink, peach, steel-light, ice
+// BLOOPI candy palette: sky, pink, peach, ice
 const COLORS = [
   { r: 202, g: 230, b: 255 },
   { r: 255, g: 215, b: 251 },
   { r: 255, g: 221, b: 189 },
-  { r: 184, g: 202, b: 227 },
   { r: 205, g: 222, b: 255 },
 ] as const
 
+// Real product vocabulary — revealed one by one when popping bubbles
 const MESSAGES = [
-  'Early Access Soon',
-  'Bloopi is coming',
-  'World, meet Bloopi',
-  'From Spain to your feed',
-  'La red social más real',
-  'Tu nueva RRSS',
-  'El chat cobra vida',
-  'Más chat, más vida',
-  'El grupo se mueve',
-  'Únete al momento',
-  'Pasa algo. Bloopi.',
-  'No llegues tarde',
-  'No seas el último',
-  'Bloop Bloop Bloop',
-  'Ready to Bloop?',
-  'Loop it or lose it',
   '¿Qué es un Loop?',
-  'Loops de verdad',
-  'Sin filtros',
-  'Más real. Más vivo.',
-  'Conecta en Bloopi',
-  'Ratona te quiero!',
-  'Papá va x ti',
-
-  'Crece en equipo',
-  'The group era begins',
-  'Not another feed',
-  'Pronto en tu móvil',
+  'Lo que merezca vivir, hacedlo Loop',
+  'El chat vive 3 días',
+  'El grupo lo vota 🗳',
+  'Mirar antes de entrar 👁',
+  'Nadie sabrá que miras',
+  'Manda una pompa al grupo',
+  'Los jueves pasa algo en Bloopi',
+  'Blop: fotos con conversación encima',
+  'Loops que viven',
+  'Grupos de verdad',
+  'Democracia de verdad',
+  'Bloop bloop bloop 🫧',
+  'Ready to Bloop?',
+  'Hecha en España',
+  'Made for the world 🌍',
+  'La beta ya está en marcha',
+  'Los primeros entran antes',
 ]
 
 const EXPLODE_DURATION = 0.38
+const TAG_LIFETIME_MS  = 3200
 
-function shuffle<T>(arr: T[]): T[] {
+function shuffle<T>(arr: readonly T[]): T[] {
   const a = [...arr]
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -100,8 +91,6 @@ function drawBubble(ctx: CanvasRenderingContext2D, b: Bubble, t: number) {
   const cg = Math.round(Math.min(255, col.g + s * 14))
   const cb = Math.round(Math.min(255, col.b + s * 18))
 
-  ctx.save()
-
   const fill = ctx.createRadialGradient(
     x - r * 0.22, y - r * 0.25, r * 0.05,
     x, y, r,
@@ -121,18 +110,6 @@ function drawBubble(ctx: CanvasRenderingContext2D, b: Bubble, t: number) {
   ctx.lineWidth = 2
   ctx.stroke()
 
-  ctx.beginPath()
-  ctx.arc(x, y + r * 0.06, r * 0.92, Math.PI * 0.25, Math.PI * 0.75)
-  ctx.strokeStyle = 'rgba(134,129,160,0.18)'
-  ctx.lineWidth = 1.2
-  ctx.stroke()
-
-  ctx.beginPath()
-  ctx.arc(x, y, r * 0.88, 0, Math.PI * 2)
-  ctx.strokeStyle = `rgba(${cr},${cg},${cb},0.28)`
-  ctx.lineWidth = 0.8
-  ctx.stroke()
-
   const hx    = x - r * 0.24
   const hy    = y - r * 0.26
   const hRad  = r * 0.30
@@ -144,19 +121,6 @@ function drawBubble(ctx: CanvasRenderingContext2D, b: Bubble, t: number) {
   ctx.ellipse(hx, hy, hRad * 1.2, hRad * 0.70, -0.52, 0, Math.PI * 2)
   ctx.fillStyle = hGrad
   ctx.fill()
-
-  const sx    = x + r * 0.30
-  const sy    = y + r * 0.36
-  const sRad  = r * 0.10
-  const sGrad = ctx.createRadialGradient(sx, sy, 0, sx, sy, sRad)
-  sGrad.addColorStop(0, 'rgba(255,255,255,0.75)')
-  sGrad.addColorStop(1, 'rgba(255,255,255,0)')
-  ctx.beginPath()
-  ctx.arc(sx, sy, sRad, 0, Math.PI * 2)
-  ctx.fillStyle = sGrad
-  ctx.fill()
-
-  ctx.restore()
 }
 
 function drawExplosion(ctx: CanvasRenderingContext2D, exp: Explosion) {
@@ -165,20 +129,11 @@ function drawExplosion(ctx: CanvasRenderingContext2D, exp: Explosion) {
   const ease  = easeOut(progress)
   const alpha = 1 - ease
 
-  ctx.save()
-
   const ringR = r * (1 + ease * 0.55)
   ctx.beginPath()
   ctx.arc(x, y, ringR, 0, Math.PI * 2)
   ctx.strokeStyle = `rgba(${col.r},${col.g},${col.b},${alpha * 0.80})`
   ctx.lineWidth = 2 * (1 - ease * 0.7)
-  ctx.stroke()
-
-  const innerR = r * (1 + ease * 0.28)
-  ctx.beginPath()
-  ctx.arc(x, y, innerR, 0, Math.PI * 2)
-  ctx.strokeStyle = `rgba(255,255,255,${alpha * 0.60})`
-  ctx.lineWidth = 1.2 * (1 - ease * 0.5)
   ctx.stroke()
 
   for (const p of particles) {
@@ -194,20 +149,15 @@ function drawExplosion(ctx: CanvasRenderingContext2D, exp: Explosion) {
     ctx.fillStyle = pGrad
     ctx.fill()
   }
-
-  ctx.restore()
 }
 
 export function SoapBubbleBackground() {
   const canvasRef  = useRef<HTMLCanvasElement>(null)
   const counterRef = useRef<HTMLSpanElement>(null)
-  // Shuffled message pool — consumed one by one, never repeated
   const msgPool    = useRef<string[]>([])
 
   useEffect(() => {
-    const reduced =
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
     const canvas = canvasRef.current
     if (!canvas) return
@@ -215,6 +165,7 @@ export function SoapBubbleBackground() {
     msgPool.current = shuffle(MESSAGES)
 
     const ctx = canvas.getContext('2d')!
+    const dpr = Math.min(window.devicePixelRatio || 1, 2)
     let W = 0, H = 0
     let bubbles: Bubble[]       = []
     let explosions: Explosion[] = []
@@ -227,6 +178,7 @@ export function SoapBubbleBackground() {
     }
 
     const spawnedTags: HTMLElement[] = []
+    const tagTimeouts: number[] = []
 
     const spawnTag = (x: number, y: number) => {
       if (msgPool.current.length === 0) return
@@ -236,16 +188,10 @@ export function SoapBubbleBackground() {
       const el = document.createElement('span')
       el.className   = 'float-tag float-tag--popped'
       el.textContent = text
-
-      // ALL styles — including centering transform — set in one cssText
-      // BEFORE appendChild so the element never paints without centering.
-      // opacity:0 hides the initial state; setTimeout(16) fires after the
-      // browser has committed one paint, guaranteeing the transition fires
-      // on iOS Safari and Chrome Android (more reliable than void offsetHeight).
       el.style.cssText = [
-        'position:absolute',
-        `left:${x + window.scrollX}px`,
-        `top:${y + window.scrollY}px`,
+        'position:fixed',
+        `left:${x}px`,
+        `top:${y}px`,
         `transform:translate(-50%,-50%) rotate(${rot}) scale(${reduced ? 1 : 0.5})`,
         `opacity:${reduced ? 1 : 0}`,
         'z-index:202',
@@ -256,34 +202,40 @@ export function SoapBubbleBackground() {
       spawnedTags.push(el)
 
       if (!reduced) {
-        setTimeout(() => {
+        tagTimeouts.push(window.setTimeout(() => {
           el.style.transition = 'opacity 0.28s ease, transform 0.34s cubic-bezier(0.34,1.56,0.64,1)'
           el.style.opacity    = '1'
           el.style.transform  = `translate(-50%,-50%) rotate(${rot}) scale(1)`
-        }, 16)
+        }, 16))
       }
+      // Fade the pill out after a few seconds so tags never pile up on screen
+      tagTimeouts.push(window.setTimeout(() => {
+        el.style.transition = 'opacity 0.6s ease'
+        el.style.opacity    = '0'
+        tagTimeouts.push(window.setTimeout(() => el.remove(), 650))
+      }, TAG_LIFETIME_MS))
     }
 
-    // Track the last bubble count so we only regenerate when the
-    // mobile/desktop breakpoint actually changes, not on every browser-
-    // chrome resize (address bar hiding/showing on scroll in mobile).
+    // Only regenerate bubbles when the breakpoint changes, not on every
+    // browser-chrome resize (mobile address bar show/hide).
     let lastCount = -1
 
     const resize = () => {
       W = window.innerWidth
       H = window.innerHeight
-      canvas.width  = W
-      canvas.height = H
+      canvas.width  = Math.round(W * dpr)
+      canvas.height = Math.round(H * dpr)
+      canvas.style.width  = `${W}px`
+      canvas.style.height = `${H}px`
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       const count = W < 768 ? 16 : 18
 
       if (count !== lastCount) {
-        // Real layout change (first load or orientation flip) → regenerate
         bubbles    = makeBubbles(W, H, count)
         explosions = []
         updateCounter(bubbles.length)
         lastCount  = count
       } else {
-        // Just browser chrome resizing (mobile scroll) → keep bubbles, clamp positions
         for (const b of bubbles) {
           b.x = Math.min(Math.max(b.x, b.r), W - b.r)
           b.y = Math.min(Math.max(b.y, b.r), H - b.r)
@@ -298,7 +250,6 @@ export function SoapBubbleBackground() {
 
     const tryPop = (clientX: number, clientY: number, isTouch: boolean) => {
       if (reduced) return
-      // Expand hit radius for touch — a finger covers more area than a cursor
       const extra = isTouch ? 10 : 0
       for (let i = bubbles.length - 1; i >= 0; i--) {
         const b    = bubbles[i]
@@ -315,15 +266,12 @@ export function SoapBubbleBackground() {
           explosions.push({ x: b.x, y: b.y, r: b.r, ci: b.ci, progress: 0, particles })
           bubbles.splice(i, 1)
           updateCounter(bubbles.length)
-          spawnTag(clientX, clientY)  // tag at exact tap/click position
+          spawnTag(clientX, clientY)
           break
         }
       }
     }
 
-    // pointerdown covers mouse, touch and stylus in one event.
-    // passive:true so the browser never waits on us before scrolling.
-    // No preventDefault/stopPropagation — taps on buttons/links still fire.
     const onPointerDown = (e: PointerEvent) => {
       tryPop(e.clientX, e.clientY, e.pointerType === 'touch')
     }
@@ -364,6 +312,7 @@ export function SoapBubbleBackground() {
       cancelAnimationFrame(rafId)
       window.removeEventListener('resize', resize)
       window.removeEventListener('pointerdown', onPointerDown)
+      tagTimeouts.forEach(clearTimeout)
       spawnedTags.forEach(el => el.remove())
     }
   }, [])
@@ -375,10 +324,10 @@ export function SoapBubbleBackground() {
         className="soap-bubbles"
         aria-hidden="true"
       />
-      <div className="bubble-counter" aria-live="polite" aria-label="Burbujas restantes">
-        <span className="bubble-counter__icon">○</span>
+      <div className="bubble-counter" aria-hidden="true">
+        <span className="bubble-counter__icon">🫧</span>
         <span ref={counterRef} className="bubble-counter__num">0</span>
-        <span className="bubble-counter__label">burbujas</span>
+        <span className="bubble-counter__label">pompas</span>
       </div>
     </>
   )

@@ -1,9 +1,11 @@
-import { NavBar }                from './components/NavBar'
+import { NavBar }               from './components/NavBar'
 import { SoapBubbleBackground } from './components/SoapBubbleBackground'
 import { Hero }                 from './sections/Hero'
-import { HypeSection }          from './sections/HypeSection'
-import { GroupSection }         from './sections/GroupSection'
-import { GlobalSection }        from './sections/GlobalSection'
+import { Manifesto }            from './sections/Manifesto'
+import { LoopSection }          from './sections/LoopSection'
+import { BlopSection }          from './sections/BlopSection'
+import { VoteSection }          from './sections/VoteSection'
+import { SpectatorSection }     from './sections/SpectatorSection'
 import { WaitlistSection }      from './sections/WaitlistSection'
 import { Footer }               from './sections/Footer'
 
@@ -14,9 +16,11 @@ export default function App() {
       <NavBar />
       <main>
         <Hero />
-        <HypeSection />
-        <GroupSection />
-        <GlobalSection />
+        <Manifesto />
+        <LoopSection />
+        <BlopSection />
+        <VoteSection />
+        <SpectatorSection />
         <WaitlistSection />
       </main>
       <Footer />
