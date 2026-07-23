@@ -75,7 +75,7 @@ img, svg { display: block; max-width: 100%; }
   padding: 9px 11px 9px 18px;
   box-shadow: 0 10px 40px rgba(134, 129, 160, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
-.nav__logo { display: flex; align-items: center; gap: 9px; }
+.nav__logo { display: flex; align-items: center; gap: 9px; text-decoration: none; }
 .nav__logo img { height: 26px; width: auto; }
 .nav__wordmark {
   font-family: var(--display);
@@ -87,10 +87,20 @@ img, svg { display: block; max-width: 100%; }
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+.nav__link {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.2s;
+}
+.nav__link:hover { color: var(--ink); }
 .nav__cta {
   font-size: 13px;
   font-weight: 700;
   color: #fff;
+  text-decoration: none;
   white-space: nowrap;
   padding: 10px 20px;
   border-radius: 100px;
@@ -883,4 +893,10 @@ h2 {
   .wl-form button { width: 100%; padding: 14px; }
 
   .footer { flex-direction: column; text-align: center; padding: 36px 20px 80px; }
+}
+
+@media (max-width: 480px) {
+  /* Con el enlace Cronología, tres piezas no caben con el wordmark */
+  .nav__wordmark { display: none; }
+  .nav { gap: 10px; }
 }
