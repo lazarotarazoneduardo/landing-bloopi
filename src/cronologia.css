@@ -43,17 +43,6 @@
 }
 .cr-hero .lead strong { color: var(--ink); font-weight: 700; }
 
-/* La imagen de las noches: el trabajo que no se ve, hecho visible */
-.cr-hero__fig {
-  max-width: 680px;
-  margin: 0 auto 34px;
-  border-radius: 26px;
-  overflow: hidden;
-  box-shadow: 0 24px 60px rgba(76, 29, 149, 0.22);
-  border: 1px solid rgba(255, 255, 255, 0.7);
-}
-.cr-hero__fig img { width: 100%; height: auto; display: block; }
-
 /* Cifras totales: franja discreta, no protagonista */
 .cr-stats {
   display: flex;

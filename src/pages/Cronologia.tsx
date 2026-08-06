@@ -526,14 +526,6 @@ export function CronologiaPage() {
         <p className="lead">
           Una persona picando código. Esto es todo lo que ha pasado hasta ahora.
         </p>
-        <figure className="cr-hero__fig">
-          <img
-            src="/assets/cronologia/hero-noches.jpg"
-            alt="Un escritorio de madrugada con el portátil encendido y pompas de jabón llevándose momentos por la ventana"
-            width="1400"
-            height="788"
-          />
-        </figure>
         <div className="cr-stats" role="list" aria-label="Cifras del proyecto">
           <span className="cr-stat" role="listitem"><Num to={92} /> días</span>
           <span className="cr-stat" role="listitem"><Num to={915} /> commits</span>
