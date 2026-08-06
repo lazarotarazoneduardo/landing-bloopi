@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Footer } from '../sections/Footer'
 import '../cronologia.css'
 
-/* ─── Datos: la historia real del repo (git log + docs, 23-07-2026) ─── */
+/* ─── Datos: la historia real del repo (git log + roadmap, 06-08-2026) ─── */
 
 interface Hito {
   fecha: string
@@ -157,16 +157,84 @@ const ERAS: Era[] = [
       },
       {
         fecha: '23 jul',
+        titulo: 'También en Android',
+        texto:
+          'Bloopi sube a Google Play en prueba interna: la beta deja de ser solo de iPhone. Cuatro mejoras publicadas en directo durante el QA del mismo día.',
+      },
+    ],
+  },
+  {
+    id: 'pulido',
+    mes: 'Julio ’26',
+    nombre: 'El pulido',
+    hitos: [
+      {
+        fecha: '24 jul',
+        titulo: 'Auditoría a fondo',
+        texto:
+          'Una revisión completa de la app: 154 hallazgos anotados y clasificados. Ese mismo día, ocho zonas del chat que iban a golpe de refresco pasan a tiempo real.',
+      },
+      {
+        fecha: '25 jul',
+        titulo: 'Votar deja de ser un formulario',
+        texto:
+          'Todas las decisiones duran una hora y se ven como un tira y afloja de cristal. Y quien gana la propuesta de capitán, capitanea de verdad.',
+      },
+      {
+        fecha: '28 jul',
+        titulo: 'El tutorial que se juega',
+        texto:
+          'Muere el onboarding clásico. Ahora la app se enseña desde dentro: un chat de práctica, una votación real y un Loop que publicas tú.',
+      },
+      {
+        fecha: '29 jul',
+        titulo: 'Build 1.0.4 en las dos tiendas',
+        texto:
+          'El teclado del chat se reescribe entero y sale a App Store y Google Play el mismo día. El menú de long-press ya se siente como el de WhatsApp.',
+      },
+      {
+        fecha: '31 jul',
+        titulo: 'TikTok dentro, Bloopi fuera',
+        texto:
+          'Los enlaces de TikTok se ven sin salir del chat, y Bloopi aparece en el menú de compartir del móvil. El estudio de Blops estrena recorte de vídeo y sonido.',
+      },
+    ],
+  },
+  {
+    id: 'economia',
+    mes: 'Agosto ’26',
+    nombre: 'La economía de burbujas',
+    hitos: [
+      {
+        fecha: '3 ago',
+        titulo: 'Un Loop se comparte como vídeo',
+        texto:
+          'Compositor propio: un Loop sale en vídeo a Instagram, TikTok o WhatsApp. Las notificaciones de grupo se agrupan en una sola conversación, y el buzón de Actividad se ordena por sectores.',
+      },
+      {
+        fecha: '4 ago',
+        titulo: 'Nacen las burbujas 🫧',
+        texto:
+          'La moneda de Bloopi. Se ganan acabando el tutorial o invitando a alguien, y se gastan en skins para tu burbuja de chat. La Tienda vende, la Colección viste.',
+      },
+      {
+        fecha: '5 ago',
+        titulo: 'El arranque se cuenta solo',
+        texto:
+          'Tres pompas componen el logo y explotan: la app entra por su propia marca. Ese mismo día el chat aprende a olvidar de verdad — nada más de tres días.',
+      },
+      {
+        fecha: '6 ago',
         titulo: 'Hoy',
         texto:
-          'Cuatro mejoras publicadas en directo durante el QA. Bloopi ya está subida a Google Play, en prueba interna: la beta deja de ser solo de iPhone. En iOS, la última versión espera la revisión de Apple.',
+          'La beta sigue abierta mientras se prepara la infraestructura para crecer. Lo último: el arranque en cristal líquido, dibujado entero por vectores.',
         hoy: true,
       },
     ],
   },
 ]
 
-/* Commits por día, sacados del git log (16-04 → 23-07). Un día ausente = 0. */
+/* Commits por día, sacados del git log (16-04 → 06-08). Un día ausente = 0. */
 const DAILY: Record<string, number> = {
   '2026-04-16': 1, '2026-04-21': 3, '2026-04-23': 3, '2026-04-24': 2, '2026-04-27': 1,
   '2026-05-06': 19, '2026-05-07': 39, '2026-05-12': 44, '2026-05-13': 3, '2026-05-19': 7,
@@ -175,10 +243,13 @@ const DAILY: Record<string, number> = {
   '2026-07-02': 24, '2026-07-03': 52, '2026-07-05': 7, '2026-07-06': 43, '2026-07-07': 44,
   '2026-07-08': 23, '2026-07-09': 6, '2026-07-10': 7, '2026-07-13': 43, '2026-07-14': 45,
   '2026-07-15': 43, '2026-07-16': 48, '2026-07-17': 53, '2026-07-18': 23, '2026-07-19': 12,
-  '2026-07-20': 79, '2026-07-21': 57, '2026-07-22': 27, '2026-07-23': 17,
+  '2026-07-20': 79, '2026-07-21': 57, '2026-07-22': 27, '2026-07-23': 18, '2026-07-24': 52,
+  '2026-07-25': 23, '2026-07-27': 58, '2026-07-28': 51, '2026-07-29': 49, '2026-07-30': 65,
+  '2026-07-31': 68, '2026-08-02': 19, '2026-08-03': 43, '2026-08-04': 58, '2026-08-05': 31,
+  '2026-08-06': 24,
 }
 const HEAT_START = '2026-04-16'
-const HEAT_END = '2026-07-23'
+const HEAT_END = '2026-08-06'
 const PEAK_DAY = '2026-07-20'
 
 const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
@@ -220,7 +291,7 @@ function Heatmap() {
       <div
         className="cr-heat__grid"
         role="img"
-        aria-label="Mapa de commits por día, del 16 de abril al 23 de julio de 2026. El día más intenso: 20 de julio, 79 commits."
+        aria-label="Mapa de commits por día, del 16 de abril al 6 de agosto de 2026. El día más intenso: 20 de julio, 79 commits."
       >
         {cells.map((c, i) =>
           c.lvl < 0 ? (
@@ -339,7 +410,7 @@ function Escena({ era, on }: { era: string; on: boolean }) {
         <div className={cls('cr-scene--dark')} aria-hidden="true">
           <span className="sc cr-term" style={d(0)}>git init bloopi</span>
           <span className="sc cr-term cr-term--ok" style={d(0.25)}>✓ auth · perfiles · rls</span>
-          <span className="sc cr-term cr-term--ok" style={d(0.5)}>✓ 240 migraciones por venir</span>
+          <span className="sc cr-term cr-term--ok" style={d(0.5)}>✓ 301 migraciones por venir</span>
           <span className="cr-scene__cursor sc" style={d(0.7)} />
         </div>
       )
@@ -395,6 +466,31 @@ function Escena({ era, on }: { era: string; on: boolean }) {
             La beta está abierta 🫧 Los primeros 50 ya están dentro.
           </div>
           <span className="cr-scene__testers sc" style={d(0.55)}>50/50 plazas ocupadas</span>
+        </div>
+      )
+    case 'pulido':
+      return (
+        <div className={cls()} aria-hidden="true">
+          <span className="cr-scene__sticker sc" style={d(0.1)}>⌨️</span>
+          <div className="cr-scene__stores sc" style={d(0.35)}>
+            <span> App Store</span>
+            <span>▶ Google Play</span>
+          </div>
+          <span className="day sc" style={d(0.6)}>1.0.4 · el mismo día en las dos</span>
+        </div>
+      )
+    case 'economia':
+      return (
+        <div className={cls()} aria-hidden="true">
+          <span className="cr-scene__wallet sc" style={d(0.1)}>
+            🫧 <b>300</b>
+          </span>
+          <div className="cr-scene__skins sc" style={d(0.35)}>
+            <i className="sk sk--oro" />
+            <i className="sk sk--aurora" />
+            <i className="sk sk--cosmos" />
+          </div>
+          <span className="bbl bbl--out sc" style={d(0.6)}>tu burbuja, a tu gusto 🫧</span>
         </div>
       )
     default:
@@ -523,13 +619,10 @@ export function CronologiaPage() {
         <h1>
           La historia de <em>Bloopi.</em>
         </h1>
-        <p className="lead">
-          Una persona picando código. Esto es todo lo que ha pasado hasta ahora.
-        </p>
         <div className="cr-stats" role="list" aria-label="Cifras del proyecto">
-          <span className="cr-stat" role="listitem"><Num to={92} /> días</span>
-          <span className="cr-stat" role="listitem"><Num to={915} /> commits</span>
-          <span className="cr-stat" role="listitem"><Num to={96} /> de madrugada</span>
+          <span className="cr-stat" role="listitem"><Num to={113} /> días</span>
+          <span className="cr-stat" role="listitem"><Num to={1457} /> commits</span>
+          <span className="cr-stat" role="listitem"><Num to={169} /> de madrugada</span>
           <span className="cr-stat" role="listitem"><Num to={79} /> el día pico</span>
         </div>
         <Heatmap />
