@@ -245,17 +245,17 @@ export function ComoSeHizoPage() {
             <dl>
               <dt>El síntoma</dt>
               <dd>
-                Los adhesivos comprados de uno en uno aparecían en la bandeja, pero no se
+                Los stickers comprados de uno en uno aparecían en la bandeja, pero no se
                 dejaban enviar. Ni mensaje de error útil, ni teléfono a mano.
               </dd>
               <dt>La deducción</dt>
               <dd>
                 El comentario de texto viajaba por la misma llamada al servidor y sí
-                funcionaba. Luego el fallo estaba, por fuerza, en la rama del adhesivo.
+                funcionaba. Luego el fallo estaba, por fuerza, en la rama del sticker.
               </dd>
               <dt>La causa</dt>
               <dd>
-                Había dos formas de poseer un adhesivo —el paquete entero y la unidad
+                Había dos formas de poseer un sticker —el pack entero y la unidad
                 suelta— y el control de envío solo miraba la primera. Visible, y no usable.
               </dd>
               <dt>El cierre</dt>
