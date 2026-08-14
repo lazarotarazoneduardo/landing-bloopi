@@ -681,6 +681,9 @@ export function CronologiaPage() {
           La beta está abierta. Si quieres probar Bloopi, entra.
         </p>
         <a className="cr-outro__cta" href="/#waitlist">Entrar en la beta</a>
+        <a className="cr-outro__bridge" href="/como-se-hizo">
+          ¿Y cómo se construyó todo esto? →
+        </a>
       </section>
 
       <Footer />

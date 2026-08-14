@@ -1,0 +1,358 @@
+/* ═══════════════════════════════════════════════════════════
+   Cómo se construyó — el «making of» del método.
+   Hermana de /cronologia pero con otra voz: aquella es un viaje
+   con scrollytelling; esta es un documento. Aquí el ritmo lo dan
+   la retícula y la tipografía, no el movimiento. Tokens y fuentes
+   son los de la landing (index.css) — aquí no se inventa paleta.
+   ═══════════════════════════════════════════════════════════ */
+
+.cs {
+  --cs-line:  rgba(134, 129, 160, 0.16);
+  --cs-glass: rgba(255, 255, 255, 0.7);
+}
+
+/* Revelado suave y corto: es un documento, no un espectáculo */
+.cs-rv {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.cs-rv.on { opacity: 1; transform: none; }
+
+/* ═══ Hero ═══ */
+.cs-hero {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 148px 24px 22px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+.cs-eyebrow,
+.cs-kicker {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--slate);
+}
+.cs-hero h1 {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(38px, 6.6vw, 66px);
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+  margin: 0;
+}
+.cs-hero h1 em {
+  font-style: italic;
+  background: var(--grad-vivid);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.cs-lead {
+  font-size: clamp(16px, 1.7vw, 18.5px);
+  line-height: 1.62;
+  color: var(--ink-soft);
+  max-width: 56ch;
+  margin: 0;
+}
+.cs-lead strong { color: var(--ink); font-weight: 700; }
+.cs-lead--center { margin-inline: auto; }
+
+/* Cifras del hero: mismas pastillas de cristal que /cronologia */
+.cs-figs {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+}
+.cs-fig {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  padding: 8px 16px;
+  border-radius: 100px;
+  background: var(--cs-glass);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(8px);
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+.cs-fig b {
+  font-size: 15px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+/* ═══ Secciones ═══ */
+.cs-sec {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: clamp(56px, 8vw, 92px) 24px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.cs-sec h2 {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(26px, 3.6vw, 38px);
+  line-height: 1.14;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  margin: 0;
+  max-width: 20ch;
+}
+.cs-body {
+  font-size: 16.5px;
+  line-height: 1.68;
+  color: var(--ink-soft);
+  max-width: 64ch;
+  margin: 0;
+}
+.cs-body strong { color: var(--ink); font-weight: 700; }
+
+/* ═══ Tarjetas ═══ */
+.cs-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(238px, 1fr));
+  gap: 14px;
+  margin-top: 6px;
+}
+.cs-split {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+  margin-top: 6px;
+}
+.cs-card {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-soft);
+}
+.cs-card h3 {
+  font-family: var(--body);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -0.005em;
+  margin: 0;
+}
+.cs-card p {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  margin: 0;
+}
+.cs-card--wide h3 { font-size: 19px; }
+.cs-card--quote h3 {
+  font-family: var(--display);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.cs-tag {
+  align-self: flex-start;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--grad-candy);
+  border-radius: 100px;
+  padding: 4px 11px;
+}
+.cs-tag--soft {
+  background: rgba(134, 129, 160, 0.1);
+  color: var(--slate);
+}
+
+/* ═══ El ciclo: numerado porque el orden ES la información ═══ */
+.cs-ciclo {
+  counter-reset: paso;
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.66);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-soft);
+}
+.cs-ciclo li {
+  counter-increment: paso;
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  gap: 4px 14px;
+  align-items: baseline;
+  padding: 15px 22px;
+  border-top: 1px solid var(--cs-line);
+}
+.cs-ciclo li:first-child { border-top: none; }
+.cs-ciclo li::before {
+  content: counter(paso, decimal-leading-zero);
+  grid-row: span 2;
+  font-size: 12px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  background: var(--grad-vivid);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.cs-ciclo b { font-size: 15.5px; font-weight: 700; }
+.cs-ciclo span { font-size: 14.5px; line-height: 1.55; color: var(--ink-soft); }
+
+/* ═══ Caso real: la única pieza con acento lateral ═══ */
+.cs-caso {
+  margin-top: 6px;
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 22px 24px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-soft);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.cs-caso::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--grad-vivid);
+}
+.cs-caso dl { margin: 0; display: flex; flex-direction: column; gap: 12px; }
+.cs-caso dt {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--slate);
+  margin-bottom: 3px;
+}
+.cs-caso dd {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  max-width: 62ch;
+}
+
+/* ═══ Evidencia: cifra grande + qué es + qué demuestra ═══ */
+.cs-ev {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.cs-ev li {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 2px 18px;
+  align-items: baseline;
+  padding: 15px 4px;
+  border-top: 1px solid var(--cs-line);
+}
+.cs-ev li:first-child { border-top: none; }
+.cs-ev b {
+  grid-row: span 2;
+  font-family: var(--display);
+  font-size: 30px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--ink);
+}
+.cs-ev__q { font-size: 15.5px; line-height: 1.45; }
+.cs-ev__r { font-size: 13.5px; line-height: 1.45; color: var(--ink-muted); }
+
+/* ═══ Cierre ═══ */
+.cs-outro {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: clamp(72px, 10vw, 118px) 24px clamp(60px, 8vw, 96px);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+.cs-outro h2 {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(30px, 5vw, 48px);
+  line-height: 1.06;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+  margin: 0;
+}
+.cs-outro h2 em {
+  font-style: italic;
+  background: var(--grad-vivid);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.cs-outro__acts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 14px 22px;
+  margin-top: 6px;
+}
+.cs-outro__cta {
+  display: inline-block;
+  padding: 14px 32px;
+  border-radius: 100px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.cs-outro__cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 26px rgba(26, 23, 48, 0.26);
+}
+.cs-outro__alt {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--slate);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.cs-outro__alt:hover { color: var(--ink); }
+
+/* ═══ Responsive ═══ */
+@media (max-width: 640px) {
+  .cs-hero { padding-top: 122px; }
+  .cs-sec h2 { max-width: none; }
+  .cs-ciclo li { grid-template-columns: 26px 1fr; padding: 14px 17px; gap: 3px 11px; }
+  .cs-caso { padding: 20px 18px 20px 20px; }
+  .cs-ev li { grid-template-columns: 58px 1fr; gap: 2px 14px; }
+  .cs-ev b { font-size: 25px; }
+}

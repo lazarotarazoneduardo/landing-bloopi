@@ -817,6 +817,22 @@ h2 {
 }
 .footer__instagram:hover { opacity: 1; }
 
+/* Páginas del proyecto (cronología · making of) */
+.footer__links {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.footer__links a {
+  color: var(--slate);
+  text-decoration: none;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+.footer__links a:hover { opacity: 1; text-decoration: underline; }
+
 /* ═══ Soap bubbles (firma interactiva) ═══ */
 .soap-bubbles {
   position: fixed;

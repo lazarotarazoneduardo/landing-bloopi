@@ -5,6 +5,11 @@ export function Footer() {
         <img src="/assets/logo_degradado.svg" alt="BLOOPI" />
         <span className="footer__copy">BLOOPI © 2026</span>
       </div>
+      <nav className="footer__links" aria-label="Páginas del proyecto">
+        <a href="/cronologia">Cronología</a>
+        <a href="/como-se-hizo">Cómo se hizo</a>
+      </nav>
+
       <span className="footer__tagline">
         Built in Spain · Made for the world
       </span>
