@@ -64,6 +64,20 @@
   }
   [data-estado="abierto"].escena::after { opacity: 1; }
 
+  .iniciales {
+    font-family: var(--display);
+    font-style: italic;
+    font-size: clamp(1.7rem, 8vw, 2.2rem);
+    line-height: 1;
+    letter-spacing: .06em;
+  }
+  .iniciales i {
+    font-size: .72em;
+    vertical-align: .1em;
+    color: var(--albaricoque);
+    padding: 0 .12em;
+  }
+
   /* Anillo de seis tramos: uno por año */
   .anillo {
     position: relative;
@@ -219,6 +233,7 @@
 </head>
 <body>
 <main class="escena" data-estado="cuenta">
+  <p class="iniciales">P <i>y</i> E</p>
   <div class="anillo">
     <svg viewBox="0 0 200 200" aria-hidden="true"></svg>
     <div class="centro">
