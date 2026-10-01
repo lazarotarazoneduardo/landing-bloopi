@@ -18,30 +18,39 @@
     --rosa-te: #F7D9D0;
     --lila: #A892C2;
     --chispa: #FFE9A8;
+    --verde: #8FE3B0;
+    --rojo: #FF8296;
     --display: "Bodoni Moda", "Bodoni 72", Didot, "Times New Roman", serif;
     --texto: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
   }
 
   * { box-sizing: border-box; margin: 0; }
-  html, body { height: 100%; }
+  html { height: 100%; }
   body {
+    min-height: 100%;
     background: var(--noche);
     color: var(--rosa-te);
     font-family: var(--texto);
     -webkit-font-smoothing: antialiased;
-    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
   }
 
   .escena {
     position: relative;
     isolation: isolate;
     min-height: 100dvh;
+    display: grid;
+    justify-items: center;
+    padding: max(24px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom));
+  }
+  .portada {
+    align-self: center;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     gap: clamp(28px, 6dvh, 56px);
-    padding: max(24px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom));
   }
   /* La noche, y la luz que entra por abajo cuando dan las doce */
   .escena::before,
@@ -220,6 +229,203 @@
   [data-estado="abierto"] .mensaje { transition-delay: 1.2s; }
   [data-estado="abierto"] .mensaje ~ * { transition-delay: 1.9s; }
 
+  /* ---------- Examen ---------- */
+  .etiqueta {
+    font-size: .72rem;
+    font-weight: 500;
+    letter-spacing: .3em;
+    text-indent: .3em;
+    text-transform: uppercase;
+    color: var(--lila);
+  }
+  .examen {
+    width: min(100%, 27rem);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(28px, 6dvh, 52px);
+    padding-top: clamp(8px, 3dvh, 28px);
+  }
+  .avance {
+    display: grid;
+    justify-items: center;
+    gap: .9rem;
+  }
+  /* Una marca por pregunta, con el mismo trazo que los tramos del anillo */
+  .marcas {
+    display: flex;
+    gap: 8px;
+    width: min(100%, 15rem);
+  }
+  .marcas span {
+    flex: 1;
+    height: 3px;
+    border-radius: 3px;
+    background: rgba(168, 146, 194, .22);
+    transition: background .5s ease, box-shadow .5s ease;
+  }
+  .marcas .hecha {
+    background: var(--albaricoque);
+    box-shadow: 0 0 8px rgba(255, 180, 138, .6);
+  }
+  .marcas .actual { background: rgba(255, 180, 138, .5); }
+
+  .hoja {
+    margin-block: auto;
+    display: grid;
+    gap: clamp(24px, 4.5dvh, 40px);
+  }
+  .pregunta {
+    font-family: var(--display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(1.6rem, 7.2vw, 2.1rem);
+    line-height: 1.18;
+    text-align: center;
+    text-wrap: balance;
+  }
+  .opciones {
+    display: grid;
+    gap: .75rem;
+  }
+  .opcion {
+    width: 100%;
+    padding: 1.05rem 1.2rem;
+    border: 1px solid rgba(168, 146, 194, .4);
+    border-radius: 18px;
+    background: rgba(54, 32, 74, .55);
+    color: var(--rosa-te);
+    font: 500 1.05rem/1.3 var(--texto);
+    text-align: center;
+    cursor: pointer;
+    transition: background .25s ease, border-color .25s ease, color .25s ease, opacity .3s ease, box-shadow .3s ease, transform .15s ease;
+  }
+  .opcion:active { transform: scale(.985); }
+  .opcion:focus-visible { outline: 2px solid var(--chispa); outline-offset: 3px; }
+  .opcion.mal {
+    border-color: var(--rojo);
+    color: var(--rojo);
+    animation: temblor .45s ease;
+  }
+  .opcion.descartada {
+    opacity: .4;
+    pointer-events: none;
+  }
+  .opcion.bien {
+    background: var(--verde);
+    border-color: var(--verde);
+    color: #10301F;
+    box-shadow: 0 0 26px rgba(143, 227, 176, .45);
+  }
+  .opciones.resuelta .opcion { pointer-events: none; }
+  .opciones.resuelta .opcion:not(.bien) { opacity: .3; }
+  @keyframes temblor {
+    15% { transform: translateX(-8px); }
+    30% { transform: translateX(7px); }
+    45% { transform: translateX(-6px); }
+    60% { transform: translateX(4px); }
+    80% { transform: translateX(-2px); }
+  }
+  /* Fallo: la hoja hace amago de pasar a la siguiente y se vuelve */
+  .hoja.amago { animation: amago .55s cubic-bezier(.3, 1.5, .5, 1); }
+  @keyframes amago {
+    35% { transform: translateX(-26px); opacity: .7; }
+  }
+
+  /* Foto al acertar: una copia en papel sobre la noche */
+  .foto {
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 1.5rem;
+    padding: 24px;
+    background: rgba(24, 13, 33, .9);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity .45s ease;
+  }
+  .foto.visible { opacity: 1; }
+  .foto figure {
+    padding: 9px;
+    border-radius: 5px;
+    background: var(--rosa-te);
+    box-shadow: 0 26px 60px rgba(0, 0, 0, .55);
+    transform: rotate(var(--giro, -1.4deg)) scale(.92);
+    transition: transform .7s cubic-bezier(.2, .8, .2, 1);
+  }
+  .foto.visible figure { transform: rotate(var(--giro, -1.4deg)) scale(1); }
+  .foto img {
+    display: block;
+    max-width: min(78vw, 400px);
+    max-height: 56dvh;
+    border-radius: 2px;
+  }
+  .foto figcaption {
+    width: 0;
+    min-width: 100%;
+    padding: .75rem .3rem .3rem;
+    color: var(--noche);
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 1.05rem;
+    line-height: 1.3;
+    text-align: center;
+  }
+  .foto figcaption:empty { display: none; }
+
+  .corazones {
+    position: fixed;
+    inset: 0;
+    z-index: 6;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .corazones svg {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+
+  .final {
+    align-self: center;
+    width: min(100%, 27rem);
+    display: grid;
+    justify-items: center;
+    gap: 1.6rem;
+    text-align: center;
+  }
+  .final-texto {
+    font-size: 1.1rem;
+    line-height: 1.5;
+    color: var(--rosa-te);
+    text-wrap: balance;
+  }
+  .final-boton { margin-top: .4rem; }
+  .pista {
+    display: grid;
+    gap: .9rem;
+    justify-items: center;
+    width: 100%;
+    margin-top: .4rem;
+    padding: 1.6rem 1.2rem 1.8rem;
+    border: 1px solid rgba(255, 180, 138, .55);
+    border-radius: 18px;
+    background: rgba(54, 32, 74, .55);
+    box-shadow: 0 0 34px rgba(255, 180, 138, .16);
+  }
+  .pista-texto {
+    font-family: var(--display);
+    font-style: italic;
+    font-size: clamp(1.7rem, 7.6vw, 2.2rem);
+    line-height: 1.15;
+    color: var(--chispa);
+    text-wrap: balance;
+  }
+
   [hidden] { display: none !important; }
 
   @media (prefers-reduced-motion: reduce) {
@@ -233,27 +439,59 @@
 </head>
 <body>
 <main class="escena" data-estado="cuenta">
-  <p class="iniciales">P <i>y</i> E</p>
-  <div class="anillo">
-    <svg viewBox="0 0 200 200" aria-hidden="true"></svg>
-    <div class="centro">
-      <div class="cuenta" role="timer" aria-label="Tiempo que falta">
-        <span class="rotulo">faltan</span>
-        <div class="digitos"></div>
-        <span class="rotulo">horas · min · seg</span>
+  <section class="portada">
+    <p class="iniciales">P <i>y</i> E</p>
+    <div class="anillo">
+      <svg viewBox="0 0 200 200" aria-hidden="true"></svg>
+      <div class="centro">
+        <div class="cuenta" role="timer" aria-label="Tiempo que falta">
+          <span class="rotulo">faltan</span>
+          <div class="digitos"></div>
+          <span class="rotulo">horas · min · seg</span>
+        </div>
+        <p class="fecha"></p>
       </div>
-      <p class="fecha"></p>
     </div>
-  </div>
 
-  <div class="bajo">
-    <p class="pie">Algo empieza a las 00:00.</p>
-    <div class="apertura" aria-live="polite">
-      <p class="mensaje"></p>
-      <button class="boton" type="button" hidden>Empezar el examen</button>
-      <p class="pronto" hidden></p>
+    <div class="bajo">
+      <p class="pie">Algo empieza a las 00:00.</p>
+      <div class="apertura" aria-live="polite">
+        <p class="mensaje"></p>
+        <div class="accion">
+          <button class="boton" type="button" hidden>Empezar el examen</button>
+          <p class="pronto" hidden></p>
+        </div>
+      </div>
     </div>
+  </section>
+
+  <section class="examen" hidden>
+    <header class="avance">
+      <div class="marcas" aria-hidden="true"></div>
+      <p class="etiqueta paso"></p>
+    </header>
+    <div class="hoja">
+      <h1 class="pregunta"></h1>
+      <div class="opciones"></div>
+    </div>
+  </section>
+
+  <section class="final" hidden>
+    <p class="iniciales">P <i>y</i> E</p>
+    <h1 class="pregunta final-titulo"></h1>
+    <p class="final-texto"></p>
+    <button class="boton final-boton" type="button"></button>
+    <div class="pista" aria-live="polite" hidden>
+      <p class="etiqueta">La pista</p>
+      <p class="pista-texto"></p>
+    </div>
+  </section>
+
+  <div class="foto" hidden>
+    <figure><img alt=""><figcaption></figcaption></figure>
+    <p class="etiqueta">Toca para seguir</p>
   </div>
+  <div class="corazones" aria-hidden="true"></div>
 </main>
 
 <script>
@@ -261,9 +499,37 @@
   const APERTURA = '2026-10-02T00:00:00+02:00';   // medianoche de hoy, hora peninsular
   const FECHA = '02/04/2026';
   const MENSAJE = 'Para ir a la cena de mañana tendrás que pasar un pequeño examen.';
-  const EXAMEN_LISTO = false;                      // true cuando estén las preguntas
   const AVISO_SIN_EXAMEN = 'El examen aparecerá aquí mismo.';
   const VENTANA_SEXTO = 2 * 60 * 60 * 1000;        // el sexto tramo se llena en las dos últimas horas
+
+  // El examen: una entrada por pregunta. `correcta` es la posición en `opciones` (empieza en 0).
+  // `foto` y `pie` son opcionales; las fotos van en la carpeta fotos/ junto a este archivo.
+  const EXAMEN = [
+    { pregunta: 'Arriba quién', opciones: ['España', 'Marruecos'], correcta: 0, foto: 'fotos/07.jpg' },
+    { pregunta: 'Primera receta que me hiciste', opciones: ['Carbonara', 'Pizza', 'Lasaña', 'Sopa'], correcta: 0, foto: 'fotos/17.jpg' },
+    { pregunta: 'Qué es lo que más nos gusta tomarnos juntos', opciones: ['Un té matcha', 'Un café', 'Un gin-tonic', 'Una cerveza'], correcta: 3, foto: 'fotos/18.jpg' },
+    { pregunta: 'Dónde te dije te quiero por primera vez', opciones: ['Alboraya', 'Foios', 'Puzol', 'London'], correcta: 3, foto: 'fotos/23.jpg' },
+    { pregunta: 'Cuál es nuestro cóctel favorito', opciones: ['Manhattan', 'Sex on the Beach', 'Solero'], correcta: 2, foto: 'fotos/04.jpg' },
+    { pregunta: 'Mejor borrachera juntos de verano', opciones: ['Orquesta fiestas Alboraya', 'El puerto el día que te cagabas encima', 'Tabernes', 'Fortanete'], correcta: 0, foto: 'fotos/09.jpg' },
+    { pregunta: 'Primera amiga que hiciste de mi grupo', opciones: ['Patri', 'Paula', 'Clara Díaz', 'No tengo más amigas xd'], correcta: 0, foto: 'fotos/06.jpg' },
+    { pregunta: 'Persona més charraora del món', opciones: ['Dani Panach', 'Zarzo', 'Mesa borracho', 'Don Vicente Ballester'], correcta: 3, foto: 'fotos/01.jpg' },
+    { pregunta: 'Quién hace mejor fotos de los dos', opciones: ['Tú', 'Yo'], correcta: 1, foto: 'fotos/22.jpg' },
+    { pregunta: 'Fin de semana más feliz en la vida de Kun', opciones: ['Culla', 'Pirineos', 'Benicasim'], correcta: 1, foto: 'fotos/15.jpg' },
+    { pregunta: 'Cenar por Valencia centro y _______', opciones: ['A casa', 'De copas', 'A por un helado'], correcta: 2, foto: 'fotos/08.jpg' },
+    { pregunta: 'Verano, sin plan, en casa juntos, desayunamos y _______', opciones: ['Salimos a correr', 'Bicicleta', 'Escalada', 'Piscina'], correcta: 3, foto: 'fotos/13.jpg' },
+    { pregunta: 'Peor plan para Edu', opciones: ['Ir a jugar al fútbol', 'Pasear a Kun', 'Dormir la siesta', 'Ir a Ikea'], correcta: 3, foto: 'fotos/12.jpg' },
+    { pregunta: 'Cómo se llama el taxi de Pilar', opciones: ['Uber', 'Bolt', 'Cabify', 'Dudufy'], correcta: 3, foto: 'fotos/11.jpg' },
+    { pregunta: 'Qué es lo que le pone más a Edu', opciones: ['Ver a su ratona planchar una camisa', 'Verla vestida de fiesta', 'Verla saliendo de la ducha'], correcta: 0, foto: 'fotos/14.jpg' },
+    { pregunta: 'Cómo le gusta a Edu que vaya Pilar en el coche', opciones: ['Mandando y quejándose', 'Calladita'], correcta: 1, foto: 'fotos/05.jpg' },
+    { pregunta: 'Dónde te pedí ser novios', opciones: ['En un telesilla', 'En el London Eye', 'En una cena', 'En el coche'], correcta: 0, foto: 'fotos/19.jpg' },
+    { pregunta: 'Plan favorito de Edu', opciones: ['Mejor viaje del mundo', 'Un yate con su novia y amigos', 'Casa, Kun y su ratona'], correcta: 2, foto: 'fotos/10.jpg' },
+  ];
+  const FINAL = {
+    titulo: 'Enhorabuena',
+    texto: 'Has ganado una cena para 2 mañana en ubicación desconocida.',
+    boton: 'Desbloquear la pista',
+    pista: 'Se come con palillos',
+  };
 
   const escena = document.querySelector('.escena');
   const svg = document.querySelector('.anillo svg');
@@ -276,6 +542,7 @@
   const objetivo = enLocal && params.has('ensayo')
     ? Date.now() + (Number(params.get('ensayo')) || 0) * 1000
     : Date.parse(APERTURA);
+  const EXAMEN_LISTO = EXAMEN.length > 0;
 
   // Textos de la apertura
   const fecha = document.querySelector('.fecha');
@@ -353,6 +620,219 @@
   } else {
     tic();
     reloj = setInterval(tic, 250);
+  }
+
+  // ---------- Examen ----------
+  const portada = document.querySelector('.portada');
+  const examen = document.querySelector('.examen');
+  const final = document.querySelector('.final');
+  const hoja = document.querySelector('.hoja');
+  const marcas = document.querySelector('.marcas');
+  const capaFoto = document.querySelector('.foto');
+  const capaCorazones = document.querySelector('.corazones');
+  const boton = document.querySelector('.boton');
+  const sinMovimiento = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const esperar = (ms) => new Promise((ok) => setTimeout(ok, ms));
+
+  // El progreso se guarda para que pueda cerrar la página y seguir luego
+  const CLAVE = '6y:paso';
+  const recordar = !(enLocal && params.has('ensayo'));
+  function leerPaso() {
+    if (!recordar) return 0;
+    try { return Math.min(EXAMEN.length, Number(localStorage.getItem(CLAVE)) || 0); } catch { return 0; }
+  }
+  function guardarPaso(n) {
+    if (!recordar) return;
+    try { localStorage.setItem(CLAVE, n); } catch {}
+  }
+  let paso = leerPaso();
+
+  async function cambiar(de, a) {
+    if (!sinMovimiento) await de.animate({ opacity: [1, 0] }, { duration: 320, easing: 'ease' }).finished;
+    de.hidden = true;
+    a.hidden = false;
+    window.scrollTo(0, 0);
+    if (!sinMovimiento) {
+      a.animate({ opacity: [0, 1], transform: ['translateY(12px)', 'none'] },
+        { duration: 500, easing: 'cubic-bezier(.2, .7, .2, 1)' });
+    }
+  }
+
+  // El iPhone no deja vibrar desde una web; conmutar un interruptor nativo da un toque háptico
+  function toque() {
+    try {
+      const label = document.createElement('label');
+      label.style.display = 'none';
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.setAttribute('switch', '');
+      label.appendChild(input);
+      document.head.appendChild(label);
+      label.click();
+      label.remove();
+    } catch {}
+  }
+  function vibrar(veces) {
+    if (navigator.vibrate) { navigator.vibrate(veces === 1 ? 30 : [45, 70, 45]); return; }
+    for (let i = 0; i < veces; i++) setTimeout(toque, i * 110);
+  }
+
+  const TONOS = ['#FFB48A', '#FFE9A8', '#FF8FA3', '#F7D9D0'];
+  function corazon(x, y, dx, dy, retraso) {
+    const t = 14 + Math.random() * 22;
+    const s = document.createElementNS(NS, 'svg');
+    s.setAttribute('viewBox', '0 0 24 24');
+    s.setAttribute('width', t);
+    s.setAttribute('height', t);
+    s.innerHTML = `<path fill="${TONOS[Math.floor(Math.random() * TONOS.length)]}" d="M12 21s-7.5-4.6-10-9.3C.4 8.5 2 4.5 5.8 4.1 8 3.9 9.9 5 12 7.4c2.1-2.4 4-3.5 6.2-3.3C22 4.5 23.6 8.5 22 11.7 19.5 16.4 12 21 12 21z"/>`;
+    capaCorazones.appendChild(s);
+    const x0 = x - t / 2, y0 = y - t / 2;
+    s.animate([
+      { transform: `translate(${x0}px, ${y0}px) scale(.2) rotate(0deg)`, opacity: 0 },
+      { opacity: 1, offset: .15 },
+      { opacity: 1, offset: .6 },
+      { transform: `translate(${x0 + dx}px, ${y0 + dy}px) scale(1) rotate(${(Math.random() - .5) * 70}deg)`, opacity: 0 },
+    ], { duration: 1300 + Math.random() * 900, delay: retraso, easing: 'cubic-bezier(.15, .7, .3, 1)', fill: 'both' })
+      .finished.then(() => s.remove());
+  }
+  // Salen de la respuesta acertada…
+  function estallido(el) {
+    if (sinMovimiento) return;
+    const r = el.getBoundingClientRect();
+    for (let i = 0; i < 16; i++) {
+      corazon(r.left + r.width * Math.random(), r.top + r.height / 2,
+        (Math.random() - .5) * 220, -(120 + Math.random() * 260), Math.random() * 150);
+    }
+  }
+  // …y suben desde abajo por todo el ancho
+  function lluvia(n = 22) {
+    if (sinMovimiento) return;
+    for (let i = 0; i < n; i++) {
+      corazon(Math.random() * innerWidth, innerHeight + 20,
+        (Math.random() - .5) * 80, -(innerHeight * (.45 + Math.random() * .6)), Math.random() * 700);
+    }
+  }
+
+  function pintarPregunta() {
+    const q = EXAMEN[paso];
+    marcas.replaceChildren(...EXAMEN.map((_, i) => {
+      const m = document.createElement('span');
+      if (i < paso) m.className = 'hecha';
+      else if (i === paso) m.className = 'actual';
+      return m;
+    }));
+    document.querySelector('.paso').textContent = `Pregunta ${paso + 1} de ${EXAMEN.length}`;
+    document.querySelector('.examen .pregunta').textContent = q.pregunta;
+    const caja = document.querySelector('.opciones');
+    caja.classList.remove('resuelta');
+    caja.replaceChildren(...q.opciones.map((texto, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'opcion';
+      b.textContent = texto;
+      b.addEventListener('click', () => (i === q.correcta ? acierto(b, q) : fallo(b)));
+      return b;
+    }));
+    if (q.foto) new Image().src = q.foto;   // que ya esté cargada cuando acierte
+  }
+
+  function fallo(b) {
+    vibrar(2);
+    const descartar = () => { b.classList.remove('mal'); b.classList.add('descartada'); b.disabled = true; };
+    if (sinMovimiento) return descartar();
+    b.classList.add('mal');
+    b.addEventListener('animationend', descartar, { once: true });
+    hoja.classList.remove('amago');
+    void hoja.offsetWidth;
+    hoja.classList.add('amago');
+  }
+
+  async function acierto(b, q) {
+    b.parentElement.classList.add('resuelta');
+    b.classList.add('bien');
+    vibrar(1);
+    marcas.children[paso].className = 'hecha';
+    estallido(b);
+    setTimeout(lluvia, 250);
+    paso += 1;
+    guardarPaso(paso);
+    await esperar(sinMovimiento ? 500 : 1150);
+    if (!q.foto) {
+      await esperar(350);
+      return siguiente(false);
+    }
+    await fotoHastaToque(q);
+    await siguiente(true);              // la pregunta nueva ya está debajo cuando se retira la foto
+    capaFoto.classList.remove('visible');
+    await esperar(sinMovimiento ? 0 : 450);
+    capaFoto.hidden = true;
+  }
+
+  function fotoHastaToque(q) {
+    return new Promise((ok) => {
+      capaFoto.querySelector('img').src = q.foto;
+      capaFoto.querySelector('figcaption').textContent = q.pie || '';
+      capaFoto.style.setProperty('--giro', `${paso % 2 ? -1.4 : 1.2}deg`);
+      capaFoto.hidden = false;
+      void capaFoto.offsetWidth;
+      capaFoto.classList.add('visible');
+      const desde = Date.now() + 700;      // que un doble toque no se salte la foto
+      capaFoto.addEventListener('click', function cerrar() {
+        if (Date.now() < desde) return;
+        capaFoto.removeEventListener('click', cerrar);
+        ok();
+      });
+    });
+  }
+
+  async function siguiente(tapada) {
+    if (paso >= EXAMEN.length) return terminar(examen);
+    if (!tapada && !sinMovimiento) {
+      await hoja.animate({ opacity: [1, 0], transform: ['none', 'translateX(-28px)'] },
+        { duration: 260, easing: 'ease-in', fill: 'forwards' }).finished;
+    }
+    hoja.getAnimations().forEach((a) => a.cancel());
+    hoja.classList.remove('amago');
+    pintarPregunta();
+    if (!sinMovimiento) {
+      hoja.animate({ opacity: [0, 1], transform: ['translateX(28px)', 'none'] },
+        { duration: 420, easing: 'cubic-bezier(.2, .7, .2, 1)' });
+    }
+  }
+
+  function terminar(desde) {
+    document.querySelector('.final-titulo').textContent = FINAL.titulo;
+    const texto = document.querySelector('.final-texto');
+    texto.textContent = FINAL.texto;
+    texto.hidden = !FINAL.texto;
+    const desbloquear = document.querySelector('.final-boton');
+    const pista = document.querySelector('.pista');
+    desbloquear.textContent = FINAL.boton;
+    desbloquear.hidden = false;
+    pista.hidden = true;
+    desbloquear.onclick = () => {
+      vibrar(1);
+      document.querySelector('.pista-texto').textContent = FINAL.pista;
+      desbloquear.hidden = true;
+      pista.hidden = false;
+      if (!sinMovimiento) {
+        pista.animate({ opacity: [0, 1], transform: ['scale(.92)', 'none'] },
+          { duration: 600, easing: 'cubic-bezier(.2, .8, .2, 1)' });
+      }
+      lluvia(30);
+    };
+    setTimeout(() => lluvia(34), 300);
+    return cambiar(desde, final);
+  }
+
+  if (EXAMEN_LISTO) {
+    if (paso >= EXAMEN.length) boton.textContent = 'Ver el premio';
+    else if (paso > 0) boton.textContent = 'Seguir con el examen';
+    boton.addEventListener('click', () => {
+      if (paso >= EXAMEN.length) return terminar(portada);
+      pintarPregunta();
+      cambiar(portada, examen);
+    });
   }
 </script>
 </body>
