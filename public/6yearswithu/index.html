@@ -542,6 +542,10 @@
   const objetivo = enLocal && params.has('ensayo')
     ? Date.now() + (Number(params.get('ensayo')) || 0) * 1000
     : Date.parse(APERTURA);
+  // La página se sirve en /6yearswithu (sin barra final), así que una ruta relativa
+  // buscaría las fotos en la raíz del dominio: publicada, se piden por su ruta completa.
+  const CARPETA = location.protocol === 'file:' ? '' : '/6yearswithu/';
+  EXAMEN.forEach((q) => { if (q.foto) q.foto = CARPETA + q.foto; });
   const EXAMEN_LISTO = EXAMEN.length > 0;
 
   // Textos de la apertura
