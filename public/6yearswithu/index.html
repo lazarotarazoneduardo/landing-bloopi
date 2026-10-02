@@ -405,6 +405,19 @@
     text-wrap: balance;
   }
   .final-boton { margin-top: .4rem; }
+  .repetir {
+    display: block;
+    margin: 1.2rem auto 0;
+    padding: .5rem .6rem;
+    border: 0;
+    background: none;
+    color: var(--lila);
+    font: 500 .92rem/1.2 var(--texto);
+    text-decoration: underline;
+    text-underline-offset: .25em;
+    cursor: pointer;
+  }
+  .repetir:focus-visible { outline: 2px solid var(--chispa); outline-offset: 3px; }
   .pista {
     display: grid;
     gap: .9rem;
@@ -460,6 +473,7 @@
         <div class="accion">
           <button class="boton" type="button" hidden>Empezar el examen</button>
           <p class="pronto" hidden></p>
+          <button class="repetir" type="button" hidden>Repetir el examen desde el principio</button>
         </div>
       </div>
     </div>
@@ -485,6 +499,7 @@
       <p class="etiqueta">La pista</p>
       <p class="pista-texto"></p>
     </div>
+    <button class="repetir" type="button">Repetir el examen</button>
   </section>
 
   <div class="foto" hidden>
@@ -829,9 +844,23 @@
     return cambiar(desde, final);
   }
 
+  // Volver a la primera pregunta, desde la portada o desde el final
+  function repetir(desde) {
+    paso = 0;
+    guardarPaso(0);
+    pintarPregunta();
+    cambiar(desde, examen);
+  }
+  final.querySelector('.repetir').addEventListener('click', () => repetir(final));
+
   if (EXAMEN_LISTO) {
     if (paso >= EXAMEN.length) boton.textContent = 'Ver el premio';
     else if (paso > 0) boton.textContent = 'Seguir con el examen';
+    if (paso > 0) {
+      const otraVez = portada.querySelector('.repetir');
+      otraVez.hidden = false;
+      otraVez.addEventListener('click', () => repetir(portada));
+    }
     boton.addEventListener('click', () => {
       if (paso >= EXAMEN.length) return terminar(portada);
       pintarPregunta();
