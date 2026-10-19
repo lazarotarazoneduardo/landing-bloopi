@@ -205,6 +205,12 @@ h1 em, h2 em, .manif em {
   color: var(--ink);
 }
 .wl-form input::placeholder { color: var(--ink-muted); }
+/* Foco visible con teclado: se ilumina la píldora entera, no el campo (que va sin
+   outline a propósito porque el rectángulo del navegador rompe la forma). */
+.wl-form:focus-within {
+  border-color: var(--vivid-violet);
+  box-shadow: 0 0 0 3px rgba(166, 108, 255, 0.35), var(--shadow-soft);
+}
 .wl-form button {
   flex-shrink: 0;
   font-size: 14px;
