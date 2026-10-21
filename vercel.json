@@ -1,6 +1,19 @@
 {
   "rewrites": [
-    { "source": "/6yearswithu", "destination": "/6yearswithu/index.html" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    {
+      "source": "/6yearswithu",
+      "destination": "/6yearswithu/index.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "https://bloopi.es/",
+      "permanent": true
+    }
   ]
 }
